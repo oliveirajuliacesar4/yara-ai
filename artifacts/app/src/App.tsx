@@ -13,6 +13,7 @@ import Painel from "@/pages/dashboard";
 import NovoProjeto from "@/pages/project-new";
 import DetalhesProjeto from "@/pages/project-detail";
 import GerarProjeto from "@/pages/project-generate";
+import Memoria from "@/pages/memoria";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ function Roteador() {
         <Route path="/projetos/novo"><RotaProtegida component={NovoProjeto} /></Route>
         <Route path="/projetos/:id/gerar"><RotaProtegida component={GerarProjeto} /></Route>
         <Route path="/projetos/:id"><RotaProtegida component={DetalhesProjeto} /></Route>
+        <Route path="/memoria"><RotaProtegida component={Memoria} /></Route>
         <Route component={PaginaNaoEncontrada} />
       </Switch>
     </Layout>

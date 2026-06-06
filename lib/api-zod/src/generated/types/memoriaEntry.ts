@@ -6,9 +6,13 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export interface User {
+export interface MemoriaEntry {
   id: number;
-  name: string;
-  email: string;
-  createdAt: string;
+  categoria: string;
+  chave: string;
+  valor: string;
+  /** @nullable */
+  contexto?: string | null;
+  usos: number;
+  criadoEm: string;
 }

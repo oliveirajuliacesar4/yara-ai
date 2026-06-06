@@ -19,7 +19,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
 
   const { data: user, isLoading } = useGetMe({
-    query: { retry: false }
+    query: { queryKey: getGetMeQueryKey(), retry: false }
   });
 
   const mutacaoLogin = useLogin({

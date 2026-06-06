@@ -6,6 +6,8 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export interface SuccessResponse {
-  success: boolean;
+export interface GithubPublishResult {
+  url: string;
+  repoName: string;
+  mensagem?: string;
 }

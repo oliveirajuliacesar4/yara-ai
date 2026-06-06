@@ -10,6 +10,7 @@ export const projectsTable = pgTable("projects", {
   status: text("status").notNull().default("pending"),
   techStack: text("tech_stack"),
   generatedCode: text("generated_code"),
+  githubUrl: text("github_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });

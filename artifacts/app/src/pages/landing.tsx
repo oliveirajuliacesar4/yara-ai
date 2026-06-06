@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Cpu, Code2, Terminal } from "lucide-react";
+import { Cpu, Code2, Brain, ShieldCheck, Github } from "lucide-react";
 
 const esquemaLogin = z.object({
   email: z.string().email("E-mail inválido"),
@@ -52,26 +52,42 @@ export default function PaginaInicial() {
   return (
     <div className="min-h-screen bg-background flex flex-col md:flex-row items-center justify-center p-4 gap-12">
       <div className="flex-1 max-w-lg space-y-6">
-        <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-lg">
-          <Terminal className="w-8 h-8 text-primary" />
+        {/* Logo YARA */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center yara-glow">
+            <Cpu className="w-5 h-5 text-primary" />
+          </div>
+          <span className="font-mono font-bold text-2xl tracking-tight yara-gradient-text">YARA</span>
         </div>
-        <h1 className="text-5xl md:text-6xl font-sans font-bold tracking-tighter text-foreground">
-          Gerador de Sistemas <span className="text-primary">IA</span>
+
+        <h1 className="text-4xl md:text-5xl font-sans font-bold tracking-tight text-foreground leading-tight">
+          Sua engenheira de software<br />
+          <span className="yara-gradient-text">movida a IA</span>
         </h1>
-        <p className="text-xl text-muted-foreground font-mono">
-          Descreva seu sistema. Receba código pronto para produção. Uma fábrica de software completa ao seu comando.
+        <p className="text-base text-muted-foreground leading-relaxed">
+          Descreva o sistema que precisa. A YARA gera backend, frontend, banco de dados, testes e documentação — tudo pronto para produção.
         </p>
 
-        <div className="grid grid-cols-2 gap-4 pt-8">
-          <div className="p-4 rounded-lg bg-card border border-border">
-            <Cpu className="w-6 h-6 text-primary mb-3" />
-            <h3 className="font-bold mb-1">Arquitetura</h3>
-            <p className="text-sm text-muted-foreground">Design inteligente de sistemas e estruturação de componentes.</p>
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <div className="p-4 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors">
+            <Code2 className="w-5 h-5 text-primary mb-2" />
+            <h3 className="font-semibold text-sm mb-1">7 Etapas de Validação</h3>
+            <p className="text-xs text-muted-foreground">Código revisado e validado automaticamente antes de entrar em produção.</p>
           </div>
-          <div className="p-4 rounded-lg bg-card border border-border">
-            <Code2 className="w-6 h-6 text-primary mb-3" />
-            <h3 className="font-bold mb-1">Implementação</h3>
-            <p className="text-sm text-muted-foreground">Geração de código limpo, tipado e documentado.</p>
+          <div className="p-4 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors">
+            <Brain className="w-5 h-5 text-primary mb-2" />
+            <h3 className="font-semibold text-sm mb-1">Memória Persistente</h3>
+            <p className="text-xs text-muted-foreground">A YARA aprende com cada projeto e melhora continuamente.</p>
+          </div>
+          <div className="p-4 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors">
+            <ShieldCheck className="w-5 h-5 text-primary mb-2" />
+            <h3 className="font-semibold text-sm mb-1">Código Seguro</h3>
+            <p className="text-xs text-muted-foreground">Validação de segurança, autenticação JWT e boas práticas.</p>
+          </div>
+          <div className="p-4 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors">
+            <Github className="w-5 h-5 text-primary mb-2" />
+            <h3 className="font-semibold text-sm mb-1">Publicação GitHub</h3>
+            <p className="text-xs text-muted-foreground">Cria o repositório e faz push de todos os arquivos automaticamente.</p>
           </div>
         </div>
       </div>

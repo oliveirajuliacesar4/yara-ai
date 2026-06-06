@@ -6,6 +6,13 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export interface HealthStatus {
+export interface LogEntry {
+  id: number;
+  projetoId: number;
+  etapa: string;
   status: string;
+  mensagem: string;
+  /** @nullable */
+  duracao?: number | null;
+  criadoEm: string;
 }

@@ -1,30 +1,34 @@
 openapi: 3.1.0
 info:
   title: Api
-  version: 0.1.0
-  description: API specification for the AI System Generator platform
+  version: 0.2.0
+  description: YARA - Plataforma de Geração de Sistemas com IA
 servers:
   - url: /api
-    description: Base API path
+    description: Caminho base da API
 tags:
   - name: health
-    description: Health operations
+    description: Saúde do servidor
   - name: auth
-    description: Authentication operations
+    description: Autenticação
   - name: projects
-    description: Project management
+    description: Gestão de projetos
   - name: generate
-    description: AI code generation
+    description: Geração de sistemas com IA
+  - name: memoria
+    description: Memória e aprendizado da YARA
+  - name: github
+    description: Integração com GitHub
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
-      summary: Health check
-      description: Returns server health status
+      summary: Verificação de saúde
       responses:
         "200":
-          description: Healthy
+          description: Servidor saudável
           content:
             application/json:
               schema:
@@ -34,7 +38,7 @@ paths:
     post:
       operationId: register
       tags: [auth]
-      summary: Register a new user
+      summary: Cadastrar novo usuário
       requestBody:
         required: true
         content:
@@ -43,19 +47,19 @@ paths:
               $ref: "#/components/schemas/RegisterInput"
       responses:
         "201":
-          description: User created
+          description: Usuário criado
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/AuthResponse"
         "400":
-          description: Validation error
+          description: Dados inválidos
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "409":
-          description: Email already in use
+          description: E-mail já cadastrado
           content:
             application/json:
               schema:
@@ -65,7 +69,7 @@ paths:
     post:
       operationId: login
       tags: [auth]
-      summary: Login
+      summary: Entrar na plataforma
       requestBody:
         required: true
         content:
@@ -74,13 +78,13 @@ paths:
               $ref: "#/components/schemas/LoginInput"
       responses:
         "200":
-          description: Login successful
+          description: Login realizado
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/AuthResponse"
         "401":
-          description: Invalid credentials
+          description: Credenciais inválidas
           content:
             application/json:
               schema:
@@ -90,10 +94,10 @@ paths:
     post:
       operationId: logout
       tags: [auth]
-      summary: Logout current session
+      summary: Encerrar sessão
       responses:
         "200":
-          description: Logged out
+          description: Sessão encerrada
           content:
             application/json:
               schema:
@@ -103,16 +107,16 @@ paths:
     get:
       operationId: getMe
       tags: [auth]
-      summary: Get current authenticated user
+      summary: Obter usuário autenticado
       responses:
         "200":
-          description: Current user
+          description: Usuário atual
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
         "401":
-          description: Not authenticated
+          description: Não autenticado
           content:
             application/json:
               schema:
@@ -122,10 +126,10 @@ paths:
     get:
       operationId: listProjects
       tags: [projects]
-      summary: List all projects for the current user
+      summary: Listar projetos do usuário
       responses:
         "200":
-          description: List of projects
+          description: Lista de projetos
           content:
             application/json:
               schema:
@@ -133,7 +137,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Project"
         "401":
-          description: Not authenticated
+          description: Não autenticado
           content:
             application/json:
               schema:
@@ -141,7 +145,7 @@ paths:
     post:
       operationId: createProject
       tags: [projects]
-      summary: Create a new project
+      summary: Criar novo projeto
       requestBody:
         required: true
         content:
@@ -150,13 +154,32 @@ paths:
               $ref: "#/components/schemas/ProjectInput"
       responses:
         "201":
-          description: Project created
+          description: Projeto criado
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Project"
         "401":
-          description: Not authenticated
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /projects/stats:
+    get:
+      operationId: getProjectStats
+      tags: [projects]
+      summary: Estatísticas do painel
+      responses:
+        "200":
+          description: Estatísticas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectStats"
+        "401":
+          description: Não autenticado
           content:
             application/json:
               schema:
@@ -166,7 +189,7 @@ paths:
     get:
       operationId: getProject
       tags: [projects]
-      summary: Get a project by ID
+      summary: Obter projeto por ID
       parameters:
         - name: id
           in: path
@@ -175,13 +198,13 @@ paths:
             type: integer
       responses:
         "200":
-          description: Project details
+          description: Projeto
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Project"
         "404":
-          description: Project not found
+          description: Não encontrado
           content:
             application/json:
               schema:
@@ -189,7 +212,7 @@ paths:
     patch:
       operationId: updateProject
       tags: [projects]
-      summary: Update a project
+      summary: Atualizar projeto
       parameters:
         - name: id
           in: path
@@ -204,13 +227,13 @@ paths:
               $ref: "#/components/schemas/ProjectUpdate"
       responses:
         "200":
-          description: Updated project
+          description: Projeto atualizado
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Project"
         "404":
-          description: Not found
+          description: Não encontrado
           content:
             application/json:
               schema:
@@ -218,7 +241,7 @@ paths:
     delete:
       operationId: deleteProject
       tags: [projects]
-      summary: Delete a project
+      summary: Excluir projeto
       parameters:
         - name: id
           in: path
@@ -227,13 +250,13 @@ paths:
             type: integer
       responses:
         "200":
-          description: Deleted
+          description: Excluído
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/SuccessResponse"
         "404":
-          description: Not found
+          description: Não encontrado
           content:
             application/json:
               schema:
@@ -243,7 +266,7 @@ paths:
     post:
       operationId: generateSystem
       tags: [generate]
-      summary: Start AI code generation for a project (SSE streaming)
+      summary: Iniciar geração de sistema com YARA (SSE streaming)
       parameters:
         - name: id
           in: path
@@ -258,13 +281,13 @@ paths:
               $ref: "#/components/schemas/GenerateInput"
       responses:
         "200":
-          description: Generation started (SSE stream)
+          description: Stream SSE de geração
           content:
             text/event-stream:
               schema:
                 type: string
         "401":
-          description: Not authenticated
+          description: Não autenticado
           content:
             application/json:
               schema:
@@ -274,7 +297,7 @@ paths:
     get:
       operationId: listProjectFiles
       tags: [projects]
-      summary: List generated files for a project
+      summary: Listar arquivos gerados do projeto
       parameters:
         - name: id
           in: path
@@ -283,7 +306,7 @@ paths:
             type: integer
       responses:
         "200":
-          description: List of generated files
+          description: Lista de arquivos
           content:
             application/json:
               schema:
@@ -291,26 +314,86 @@ paths:
                 items:
                   $ref: "#/components/schemas/GeneratedFile"
         "404":
-          description: Not found
+          description: Não encontrado
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /projects/stats:
+  /projects/{id}/logs:
     get:
-      operationId: getProjectStats
+      operationId: listProjectLogs
       tags: [projects]
-      summary: Get dashboard stats for the current user
+      summary: Listar logs de geração do projeto
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         "200":
-          description: Stats summary
+          description: Lista de logs
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProjectStats"
+                type: array
+                items:
+                  $ref: "#/components/schemas/LogEntry"
+        "404":
+          description: Não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /projects/{id}/github:
+    post:
+      operationId: publishToGithub
+      tags: [github]
+      summary: Publicar projeto no GitHub
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GithubPublishInput"
+      responses:
+        "200":
+          description: Publicado no GitHub
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GithubPublishResult"
+        "400":
+          description: Erro de publicação
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /memoria:
+    get:
+      operationId: listMemoria
+      tags: [memoria]
+      summary: Listar memórias da YARA
+      responses:
+        "200":
+          description: Lista de memórias
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MemoriaEntry"
         "401":
-          description: Not authenticated
+          description: Não autenticado
           content:
             application/json:
               schema:
@@ -323,24 +406,21 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
     ErrorResponse:
       type: object
       properties:
         error:
           type: string
-      required:
-        - error
+      required: [error]
 
     SuccessResponse:
       type: object
       properties:
         success:
           type: boolean
-      required:
-        - success
+      required: [success]
 
     User:
       type: object
@@ -403,6 +483,8 @@ components:
           type: ["string", "null"]
         generatedCode:
           type: ["string", "null"]
+        githubUrl:
+          type: ["string", "null"]
         createdAt:
           type: string
         updatedAt:
@@ -455,6 +537,25 @@ components:
         createdAt:
           type: string
 
+    LogEntry:
+      type: object
+      required: [id, projetoId, etapa, status, mensagem, criadoEm]
+      properties:
+        id:
+          type: integer
+        projetoId:
+          type: integer
+        etapa:
+          type: string
+        status:
+          type: string
+        mensagem:
+          type: string
+        duracao:
+          type: ["integer", "null"]
+        criadoEm:
+          type: string
+
     ProjectStats:
       type: object
       required: [total, completed, generating, failed]
@@ -467,3 +568,45 @@ components:
           type: integer
         failed:
           type: integer
+
+    GithubPublishInput:
+      type: object
+      required: [repoName]
+      properties:
+        repoName:
+          type: string
+          minLength: 2
+        descricao:
+          type: string
+        privado:
+          type: boolean
+
+    GithubPublishResult:
+      type: object
+      required: [url, repoName]
+      properties:
+        url:
+          type: string
+        repoName:
+          type: string
+        mensagem:
+          type: string
+
+    MemoriaEntry:
+      type: object
+      required: [id, categoria, chave, valor, usos, criadoEm]
+      properties:
+        id:
+          type: integer
+        categoria:
+          type: string
+        chave:
+          type: string
+        valor:
+          type: string
+        contexto:
+          type: ["string", "null"]
+        usos:
+          type: integer
+        criadoEm:
+          type: string
