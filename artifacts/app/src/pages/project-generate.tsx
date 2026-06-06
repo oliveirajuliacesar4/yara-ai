@@ -7,166 +7,162 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Terminal, ArrowLeft, Loader2, CheckCircle2, XCircle } from "lucide-react";
 
-type LogEntry = {
+type EntradaLog = {
   id: number;
-  time: string;
-  type: "status" | "progress" | "error" | "complete" | "done" | "info";
-  message: string;
+  hora: string;
+  tipo: "status" | "progresso" | "erro" | "completo" | "concluido" | "info";
+  mensagem: string;
 };
 
-export default function ProjectGenerate() {
+export default function GerarProjeto() {
   const { id } = useParams();
-  const projectId = parseInt(id || "0", 10);
+  const projetoId = parseInt(id || "0", 10);
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
-  const logsEndRef = useRef<HTMLDivElement>(null);
-  
-  const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [progress, setProgress] = useState(0);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isDone, setIsDone] = useState(false);
-  const [prompt, setPrompt] = useState("");
-  const [hasStarted, setHasStarted] = useState(false);
+  const fimLogsRef = useRef<HTMLDivElement>(null);
 
-  const { data: project } = useGetProject(projectId, {
+  const [logs, setLogs] = useState<EntradaLog[]>([]);
+  const [progresso, setProgresso] = useState(0);
+  const [gerando, setGerando] = useState(false);
+  const [concluido, setConcluido] = useState(false);
+  const [prompt, setPrompt] = useState("");
+  const [iniciou, setIniciou] = useState(false);
+
+  const { data: projeto } = useGetProject(projetoId, {
     query: {
-      enabled: !!projectId,
-      queryKey: getGetProjectQueryKey(projectId)
+      enabled: !!projetoId,
+      queryKey: getGetProjectQueryKey(projetoId)
     }
   });
 
   useEffect(() => {
-    if (project && !prompt && !hasStarted) {
-      setPrompt(`Generate a production-ready application based on this description:\n\n${project.description}`);
+    if (projeto && !prompt && !iniciou) {
+      setPrompt(`Gere uma aplicação pronta para produção com base nesta descrição:\n\n${projeto.description}`);
     }
-  }, [project, prompt, hasStarted]);
+  }, [projeto, prompt, iniciou]);
 
   useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    fimLogsRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
 
-  const addLog = (type: LogEntry["type"], message: string) => {
+  const adicionarLog = (tipo: EntradaLog["tipo"], mensagem: string) => {
     setLogs(prev => [...prev, {
       id: Date.now() + Math.random(),
-      time: new Date().toLocaleTimeString(),
-      type,
-      message
+      hora: new Date().toLocaleTimeString("pt-BR"),
+      tipo,
+      mensagem
     }]);
   };
 
-  const startGeneration = async () => {
-    if (!prompt.trim() || isGenerating) return;
-    
-    setIsGenerating(true);
-    setHasStarted(true);
-    setIsDone(false);
-    setProgress(5);
+  const iniciarGeracao = async () => {
+    if (!prompt.trim() || gerando) return;
+
+    setGerando(true);
+    setIniciou(true);
+    setConcluido(false);
+    setProgresso(5);
     setLogs([]);
-    addLog("info", "Initializing AI architect...");
+    adicionarLog("info", "Inicializando arquiteto de IA...");
 
     try {
-      const response = await fetch(`/api/projects/${projectId}/generate`, {
+      const resposta = await fetch(`/api/projects/${projetoId}/generate`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ prompt }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to start generation");
+      if (!resposta.ok) {
+        throw new Error("Falha ao iniciar a geração");
       }
 
-      if (!response.body) {
-        throw new Error("No response body");
+      if (!resposta.body) {
+        throw new Error("Sem corpo na resposta");
       }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      
+      const leitor = resposta.body.getReader();
+      const decodificador = new TextDecoder();
+
       while (true) {
-        const { done, value } = await reader.read();
-        
-        if (done) {
-          break;
-        }
+        const { done, value } = await leitor.read();
+        if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n\n");
+        const fragmento = decodificador.decode(value, { stream: true });
+        const linhas = fragmento.split("\n\n");
 
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
+        for (const linha of linhas) {
+          if (linha.startsWith("data: ")) {
             try {
-              const data = JSON.parse(line.substring(6));
-              
-              if (data.type === "status") {
-                addLog("status", data.message);
-                setProgress(prev => Math.min(prev + 5, 90));
-              } else if (data.type === "progress") {
-                addLog("progress", `Writing: \n${data.content.substring(0, 100)}...`);
-              } else if (data.type === "complete") {
-                addLog("complete", `Generation complete. ${data.fileCount} files created.\n${data.summary}`);
-                setProgress(100);
-              } else if (data.type === "error") {
-                addLog("error", data.message);
-                setIsGenerating(false);
+              const dados = JSON.parse(linha.substring(6));
+
+              if (dados.type === "status") {
+                adicionarLog("status", dados.message);
+                setProgresso(prev => Math.min(prev + 5, 90));
+              } else if (dados.type === "progress") {
+                adicionarLog("progresso", `Escrevendo: \n${dados.content.substring(0, 100)}...`);
+              } else if (dados.type === "complete") {
+                adicionarLog("completo", `Geração concluída. ${dados.fileCount} arquivos criados.\n${dados.summary}`);
+                setProgresso(100);
+              } else if (dados.type === "error") {
+                adicionarLog("erro", dados.message);
+                setGerando(false);
                 return;
-              } else if (data.type === "done") {
-                setIsDone(true);
-                setIsGenerating(false);
-                addLog("done", "System is ready.");
-                queryClient.invalidateQueries({ queryKey: getGetProjectQueryKey(projectId) });
+              } else if (dados.type === "done") {
+                setConcluido(true);
+                setGerando(false);
+                adicionarLog("concluido", "Sistema pronto.");
+                queryClient.invalidateQueries({ queryKey: getGetProjectQueryKey(projetoId) });
               }
             } catch (e) {
-              console.error("Error parsing SSE data", e, line);
+              // ignorar erros de parsing de SSE parciais
             }
           }
         }
       }
-    } catch (error: any) {
-      addLog("error", error.message || "An unexpected error occurred");
-      setIsGenerating(false);
+    } catch (erro: any) {
+      adicionarLog("erro", erro.message || "Ocorreu um erro inesperado");
+      setGerando(false);
     }
   };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <Button variant="ghost" className="gap-2 -ml-4" onClick={() => setLocation(`/projects/${projectId}`)}>
+        <Button variant="ghost" className="gap-2 -ml-4" onClick={() => setLocation(`/projetos/${projetoId}`)}>
           <ArrowLeft className="w-4 h-4" />
-          Back to Project
+          Voltar ao Projeto
         </Button>
       </div>
 
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">System Generation</h1>
-        <p className="text-muted-foreground">The AI is ready to orchestrate your application.</p>
+        <h1 className="text-3xl font-bold tracking-tight">Geração do Sistema</h1>
+        <p className="text-muted-foreground">A IA está pronta para construir sua aplicação.</p>
       </div>
 
-      {!hasStarted ? (
+      {!iniciou ? (
         <Card className="p-6 space-y-6 border-primary/20 bg-card">
           <div className="space-y-4">
             <h3 className="font-medium text-lg flex items-center gap-2">
               <Terminal className="w-5 h-5 text-primary" />
-              Finalize Instructions
+              Instruções para a IA
             </h3>
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               className="w-full min-h-[200px] p-4 font-mono text-sm bg-secondary/50 border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-foreground resize-y"
-              placeholder="Enter generation prompt..."
-              data-testid="input-generate-prompt"
+              placeholder="Descreva o sistema que deseja gerar..."
+              data-testid="input-prompt-geracao"
             />
           </div>
           <div className="flex justify-end">
-            <Button 
-              size="lg" 
-              onClick={startGeneration}
-              disabled={!prompt.trim() || isGenerating}
+            <Button
+              size="lg"
+              onClick={iniciarGeracao}
+              disabled={!prompt.trim() || gerando}
               className="font-bold text-md px-8"
-              data-testid="btn-start-generation-confirm"
+              data-testid="btn-confirmar-geracao"
             >
-              Initialize Build Process
+              Iniciar Geração
             </Button>
           </div>
         </Card>
@@ -176,16 +172,16 @@ export default function ProjectGenerate() {
             <div className="flex-1">
               <div className="flex justify-between mb-2">
                 <span className="text-sm font-medium font-mono text-primary uppercase tracking-wider">
-                  {isGenerating ? "Processing..." : isDone ? "Completed" : "Failed"}
+                  {gerando ? "Processando..." : concluido ? "Concluído" : "Falhou"}
                 </span>
-                <span className="text-sm text-muted-foreground font-mono">{progress}%</span>
+                <span className="text-sm text-muted-foreground font-mono">{progresso}%</span>
               </div>
-              <Progress value={progress} className="h-2" />
+              <Progress value={progresso} className="h-2" />
             </div>
             <div className="w-12 flex justify-center">
-              {isGenerating ? (
+              {gerando ? (
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              ) : isDone ? (
+              ) : concluido ? (
                 <CheckCircle2 className="w-6 h-6 text-green-500" />
               ) : (
                 <XCircle className="w-6 h-6 text-destructive" />
@@ -196,36 +192,36 @@ export default function ProjectGenerate() {
           <Card className="bg-[#0d1117] border-border overflow-hidden">
             <div className="bg-[#161b22] px-4 py-2 border-b border-border flex items-center gap-2">
               <Terminal className="w-4 h-4 text-muted-foreground" />
-              <span className="text-xs font-mono text-muted-foreground">Terminal Output</span>
+              <span className="text-xs font-mono text-muted-foreground">Saída do Terminal</span>
             </div>
             <div className="p-4 h-[500px] overflow-y-auto font-mono text-sm space-y-2">
               {logs.map((log) => (
                 <div key={log.id} className="flex gap-4">
-                  <span className="text-muted-foreground shrink-0">{log.time}</span>
+                  <span className="text-muted-foreground shrink-0">{log.hora}</span>
                   <span className={`whitespace-pre-wrap break-words ${
-                    log.type === "error" ? "text-destructive" :
-                    log.type === "complete" || log.type === "done" ? "text-green-400" :
-                    log.type === "status" ? "text-primary" :
+                    log.tipo === "erro" ? "text-destructive" :
+                    log.tipo === "completo" || log.tipo === "concluido" ? "text-green-400" :
+                    log.tipo === "status" ? "text-primary" :
                     "text-gray-300"
                   }`}>
-                    {log.message}
+                    {log.mensagem}
                   </span>
                 </div>
               ))}
-              {isGenerating && (
+              {gerando && (
                 <div className="flex gap-4 animate-pulse text-muted-foreground">
                   <span>...</span>
                   <span>_</span>
                 </div>
               )}
-              <div ref={logsEndRef} />
+              <div ref={fimLogsRef} />
             </div>
           </Card>
 
-          {isDone && (
+          {concluido && (
             <div className="flex justify-end pt-4">
-              <Button onClick={() => setLocation(`/projects/${projectId}`)} size="lg">
-                View Generated System
+              <Button onClick={() => setLocation(`/projetos/${projetoId}`)} size="lg">
+                Ver Sistema Gerado
               </Button>
             </div>
           )}

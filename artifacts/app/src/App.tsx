@@ -6,17 +6,17 @@ import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { Layout } from "@/components/layout";
 import { useEffect } from "react";
 
-// Pages
-import NotFound from "@/pages/not-found";
-import Landing from "@/pages/landing";
-import Dashboard from "@/pages/dashboard";
-import ProjectNew from "@/pages/project-new";
-import ProjectDetail from "@/pages/project-detail";
-import ProjectGenerate from "@/pages/project-generate";
+// Páginas
+import PaginaNaoEncontrada from "@/pages/not-found";
+import PaginaInicial from "@/pages/landing";
+import Painel from "@/pages/dashboard";
+import NovoProjeto from "@/pages/project-new";
+import DetalhesProjeto from "@/pages/project-detail";
+import GerarProjeto from "@/pages/project-generate";
 
 const queryClient = new QueryClient();
 
-function ProtectedRoute({ component: Component, ...rest }: any) {
+function RotaProtegida({ component: Componente, ...rest }: any) {
   const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -27,26 +27,26 @@ function ProtectedRoute({ component: Component, ...rest }: any) {
   }, [user, isLoading, setLocation]);
 
   if (isLoading) {
-    return <div className="h-screen w-full flex items-center justify-center">Loading...</div>;
+    return <div className="h-screen w-full flex items-center justify-center text-muted-foreground">Carregando...</div>;
   }
 
   if (!user) {
     return null;
   }
 
-  return <Component {...rest} />;
+  return <Componente {...rest} />;
 }
 
-function Router() {
+function Roteador() {
   return (
     <Layout>
       <Switch>
-        <Route path="/" component={Landing} />
-        <Route path="/dashboard"><ProtectedRoute component={Dashboard} /></Route>
-        <Route path="/projects/new"><ProtectedRoute component={ProjectNew} /></Route>
-        <Route path="/projects/:id/generate"><ProtectedRoute component={ProjectGenerate} /></Route>
-        <Route path="/projects/:id"><ProtectedRoute component={ProjectDetail} /></Route>
-        <Route component={NotFound} />
+        <Route path="/" component={PaginaInicial} />
+        <Route path="/painel"><RotaProtegida component={Painel} /></Route>
+        <Route path="/projetos/novo"><RotaProtegida component={NovoProjeto} /></Route>
+        <Route path="/projetos/:id/gerar"><RotaProtegida component={GerarProjeto} /></Route>
+        <Route path="/projetos/:id"><RotaProtegida component={DetalhesProjeto} /></Route>
+        <Route component={PaginaNaoEncontrada} />
       </Switch>
     </Layout>
   );
@@ -58,7 +58,7 @@ function App() {
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL?.replace(/\/$/, "")}>
           <AuthProvider>
-            <Router />
+            <Roteador />
           </AuthProvider>
         </WouterRouter>
         <Toaster />

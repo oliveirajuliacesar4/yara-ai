@@ -1,58 +1,56 @@
 import { useState } from "react";
 import { useLocation, useParams } from "wouter";
-import { 
-  useGetProject, 
+import {
+  useGetProject,
   useListProjectFiles,
   useDeleteProject,
   getGetProjectQueryKey,
   getListProjectFilesQueryKey
 } from "@workspace/api-client-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Terminal, FileCode2, Play, Trash2, ArrowLeft, Download, Activity, CheckCircle2, XCircle } from "lucide-react";
+import { Terminal, FileCode2, Play, Trash2, ArrowLeft, Activity, CheckCircle2, XCircle } from "lucide-react";
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
-export default function ProjectDetail() {
+export default function DetalhesProjeto() {
   const { id } = useParams();
-  const projectId = parseInt(id || "0", 10);
+  const projetoId = parseInt(id || "0", 10);
   const [, setLocation] = useLocation();
-  const queryClient = useQueryClient();
-  
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
-  const { data: project, isLoading: projectLoading } = useGetProject(projectId, {
+  const [arquivoSelecionado, setArquivoSelecionado] = useState<string | null>(null);
+
+  const { data: projeto, isLoading: carregandoProjeto } = useGetProject(projetoId, {
     query: {
-      enabled: !!projectId,
-      queryKey: getGetProjectQueryKey(projectId)
+      enabled: !!projetoId,
+      queryKey: getGetProjectQueryKey(projetoId)
     }
   });
 
-  const { data: files, isLoading: filesLoading } = useListProjectFiles(projectId, {
+  const { data: arquivos, isLoading: carregandoArquivos } = useListProjectFiles(projetoId, {
     query: {
-      enabled: !!projectId && project?.status === "completed",
-      queryKey: getListProjectFilesQueryKey(projectId)
+      enabled: !!projetoId && projeto?.status === "completed",
+      queryKey: getListProjectFilesQueryKey(projetoId)
     }
   });
 
-  const deleteProject = useDeleteProject({
+  const excluirProjeto = useDeleteProject({
     mutation: {
       onSuccess: () => {
-        setLocation("/dashboard");
+        setLocation("/painel");
       }
     }
   });
 
-  const onDelete = () => {
-    if (confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
-      deleteProject.mutate({ id: projectId });
+  const aoExcluir = () => {
+    if (confirm("Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.")) {
+      excluirProjeto.mutate({ id: projetoId });
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const obterIconeStatus = (status: string) => {
     switch (status) {
       case "completed": return <CheckCircle2 className="w-4 h-4 text-green-500" />;
       case "generating": return <Activity className="w-4 h-4 text-primary animate-pulse" />;
@@ -61,7 +59,16 @@ export default function ProjectDetail() {
     }
   };
 
-  if (projectLoading) {
+  const traduzirStatus = (status: string) => {
+    switch (status) {
+      case "completed": return "Concluído";
+      case "generating": return "Gerando";
+      case "failed": return "Falhou";
+      default: return "Pendente";
+    }
+  };
+
+  if (carregandoProjeto) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-32" />
@@ -71,11 +78,11 @@ export default function ProjectDetail() {
     );
   }
 
-  if (!project) {
+  if (!projeto) {
     return (
       <div className="text-center py-20">
-        <h2 className="text-2xl font-bold">Project not found</h2>
-        <Button className="mt-4" onClick={() => setLocation("/dashboard")}>Back to Dashboard</Button>
+        <h2 className="text-2xl font-bold">Projeto não encontrado</h2>
+        <Button className="mt-4" onClick={() => setLocation("/painel")}>Voltar ao Painel</Button>
       </div>
     );
   }
@@ -83,23 +90,23 @@ export default function ProjectDetail() {
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between">
-        <Button variant="ghost" className="gap-2 -ml-4" onClick={() => setLocation("/dashboard")}>
+        <Button variant="ghost" className="gap-2 -ml-4" onClick={() => setLocation("/painel")}>
           <ArrowLeft className="w-4 h-4" />
-          Dashboard
+          Painel
         </Button>
         <div className="flex gap-2">
-          {project.status === "pending" || project.status === "failed" ? (
-            <Button onClick={() => setLocation(`/projects/${project.id}/generate`)} className="gap-2" data-testid="btn-start-generation">
+          {projeto.status === "pending" || projeto.status === "failed" ? (
+            <Button onClick={() => setLocation(`/projetos/${projeto.id}/gerar`)} className="gap-2" data-testid="btn-iniciar-geracao">
               <Play className="w-4 h-4" />
-              Generate Code
+              Gerar Código
             </Button>
-          ) : project.status === "generating" ? (
+          ) : projeto.status === "generating" ? (
             <Button disabled variant="outline" className="gap-2">
               <Activity className="w-4 h-4 animate-pulse text-primary" />
-              Generating...
+              Gerando...
             </Button>
           ) : null}
-          <Button variant="destructive" size="icon" onClick={onDelete} data-testid="btn-delete-project">
+          <Button variant="destructive" size="icon" onClick={aoExcluir} data-testid="btn-excluir-projeto">
             <Trash2 className="w-4 h-4" />
           </Button>
         </div>
@@ -111,72 +118,73 @@ export default function ProjectDetail() {
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-2xl mb-2">{project.name}</CardTitle>
+                  <CardTitle className="text-2xl mb-2">{projeto.name}</CardTitle>
                   <CardDescription className="font-mono text-xs">
-                    Created {format(new Date(project.createdAt), "PPP p")}
+                    Criado em {format(new Date(projeto.createdAt), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                   </CardDescription>
                 </div>
                 <Badge variant="outline" className="flex gap-2 items-center px-3 py-1">
-                  {getStatusIcon(project.status)}
-                  <span className="uppercase">{project.status}</span>
+                  {obterIconeStatus(projeto.status)}
+                  <span>{traduzirStatus(projeto.status)}</span>
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-foreground/80 whitespace-pre-wrap">{project.description}</p>
+              <p className="text-foreground/80 whitespace-pre-wrap">{projeto.description}</p>
             </CardContent>
           </Card>
 
-          {project.status === "completed" && (
+          {projeto.status === "completed" && (
             <Card className="min-h-[500px] flex flex-col overflow-hidden">
               <CardHeader className="bg-secondary/50 border-b border-border py-3">
                 <CardTitle className="text-sm font-mono flex items-center gap-2">
                   <FileCode2 className="w-4 h-4 text-primary" />
-                  Generated Code
+                  Código Gerado
                 </CardTitle>
               </CardHeader>
               <div className="flex flex-1 overflow-hidden">
-                {/* File Explorer */}
+                {/* Explorador de Arquivos */}
                 <div className="w-64 border-r border-border bg-secondary/20 p-2 overflow-y-auto">
-                  {filesLoading ? (
+                  {carregandoArquivos ? (
                     <div className="space-y-2">
                       <Skeleton className="h-8 w-full" />
                       <Skeleton className="h-8 w-full" />
                     </div>
-                  ) : files && files.length > 0 ? (
+                  ) : arquivos && arquivos.length > 0 ? (
                     <div className="space-y-1">
-                      {files.map(file => (
+                      {arquivos.map(arquivo => (
                         <button
-                          key={file.id}
-                          onClick={() => setSelectedFile(file.path)}
+                          key={arquivo.id}
+                          onClick={() => setArquivoSelecionado(arquivo.path)}
+                          data-testid={`arquivo-${arquivo.id}`}
                           className={`w-full text-left px-3 py-2 text-sm font-mono rounded-md transition-colors truncate ${
-                            selectedFile === file.path 
-                              ? "bg-primary/20 text-primary" 
+                            arquivoSelecionado === arquivo.path
+                              ? "bg-primary/20 text-primary"
                               : "hover:bg-secondary text-muted-foreground"
                           }`}
                         >
-                          {file.path}
+                          {arquivo.path}
                         </button>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-sm text-muted-foreground p-4 text-center">No files generated</div>
+                    <div className="text-sm text-muted-foreground p-4 text-center">Nenhum arquivo gerado</div>
                   )}
                 </div>
-                
-                {/* File Content */}
+
+                {/* Conteúdo do Arquivo */}
                 <div className="flex-1 bg-[#0d1117] overflow-auto relative">
-                  {selectedFile ? (
+                  {arquivoSelecionado ? (
                     <pre className="p-4 text-sm font-mono text-gray-300">
                       <code>
-                        {files?.find(f => f.path === selectedFile)?.content || ""}
+                        {arquivos?.find(f => f.path === arquivoSelecionado)?.content || ""}
                       </code>
                     </pre>
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
                       <div className="text-center">
                         <FileCode2 className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                        <p>Select a file to view its contents</p>
+                        <p>Selecione um arquivo para visualizar o conteúdo</p>
                       </div>
                     </div>
                   )}
@@ -189,21 +197,27 @@ export default function ProjectDetail() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground">Configuration</CardTitle>
+              <CardTitle className="text-sm uppercase tracking-wider text-muted-foreground">Configuração</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <div className="text-xs text-muted-foreground mb-1">Tech Stack</div>
-                <Badge variant="secondary" className="font-mono">{project.techStack || "Auto-detect"}</Badge>
+                <div className="text-xs text-muted-foreground mb-1">Tecnologias</div>
+                <Badge variant="secondary" className="font-mono">{projeto.techStack || "Detecção automática"}</Badge>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground mb-1">Project ID</div>
-                <div className="font-mono text-sm">{project.id}</div>
+                <div className="text-xs text-muted-foreground mb-1">ID do Projeto</div>
+                <div className="font-mono text-sm">{projeto.id}</div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground mb-1">Last Updated</div>
-                <div className="text-sm">{format(new Date(project.updatedAt), "PPP p")}</div>
+                <div className="text-xs text-muted-foreground mb-1">Última Atualização</div>
+                <div className="text-sm">{format(new Date(projeto.updatedAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}</div>
               </div>
+              {projeto.generatedCode && (
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Resumo</div>
+                  <div className="text-sm text-foreground/80">{projeto.generatedCode}</div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

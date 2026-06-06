@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useLocation } from "wouter";
 import { useCreateProject, getListProjectsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -9,22 +8,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Terminal, ArrowRight } from "lucide-react";
 
-const projectSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
+const esquemaProjeto = z.object({
+  name: z.string().min(2, "Nome deve ter no mínimo 2 caracteres"),
+  description: z.string().min(10, "Descrição deve ter no mínimo 10 caracteres"),
   techStack: z.string().optional(),
 });
 
-export default function ProjectNew() {
+export default function NovoProjeto() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
-  
-  const form = useForm<z.infer<typeof projectSchema>>({
-    resolver: zodResolver(projectSchema),
+
+  const form = useForm<z.infer<typeof esquemaProjeto>>({
+    resolver: zodResolver(esquemaProjeto),
     defaultValues: {
       name: "",
       description: "",
@@ -32,17 +31,17 @@ export default function ProjectNew() {
     },
   });
 
-  const createProject = useCreateProject({
+  const criarProjeto = useCreateProject({
     mutation: {
-      onSuccess: (data) => {
+      onSuccess: (dados) => {
         queryClient.invalidateQueries({ queryKey: getListProjectsQueryKey() });
-        setLocation(`/projects/${data.id}`);
+        setLocation(`/projetos/${dados.id}`);
       },
     }
   });
 
-  const onSubmit = (data: z.infer<typeof projectSchema>) => {
-    createProject.mutate({ data });
+  const aoEnviar = (dados: z.infer<typeof esquemaProjeto>) => {
+    criarProjeto.mutate({ data: dados });
   };
 
   return (
@@ -50,39 +49,39 @@ export default function ProjectNew() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
           <Terminal className="w-8 h-8 text-primary" />
-          Initialize System
+          Novo Projeto
         </h1>
-        <p className="text-muted-foreground mt-2">Define the parameters and requirements for your new AI-generated project.</p>
+        <p className="text-muted-foreground mt-2">Defina os parâmetros e requisitos do seu novo sistema gerado por IA.</p>
       </div>
 
       <Card>
         <CardContent className="pt-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(aoEnviar)} className="space-y-6">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project Name</FormLabel>
+                    <FormLabel>Nome do Projeto</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. Inventory Management API" {...field} data-testid="input-project-name" />
+                      <Input placeholder="ex: Sistema de Gestão de Estoque" {...field} data-testid="input-nome-projeto" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="techStack"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Technology Stack</FormLabel>
+                    <FormLabel>Tecnologias</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger data-testid="select-tech-stack">
-                          <SelectValue placeholder="Select a tech stack" />
+                        <SelectTrigger data-testid="select-tecnologias">
+                          <SelectValue placeholder="Selecione as tecnologias" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -92,7 +91,7 @@ export default function ProjectNew() {
                         <SelectItem value="go-react">React + Go (Fiber)</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormDescription>The primary technologies the AI should use.</FormDescription>
+                    <FormDescription>As tecnologias principais que a IA deve utilizar.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -103,38 +102,38 @@ export default function ProjectNew() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>System Description</FormLabel>
+                    <FormLabel>Descrição do Sistema</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Describe the system in detail. What are the main features? Data models? Workflows?" 
+                      <Textarea
+                        placeholder="Descreva o sistema em detalhes. Quais são as funcionalidades principais? Modelos de dados? Fluxos de trabalho?"
                         className="min-h-[200px] font-mono text-sm"
-                        {...field} 
-                        data-testid="input-project-description" 
+                        {...field}
+                        data-testid="input-descricao-projeto"
                       />
                     </FormControl>
-                    <FormDescription>Be as specific as possible for better results.</FormDescription>
+                    <FormDescription>Seja o mais específico possível para melhores resultados.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
               <div className="flex justify-end gap-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setLocation("/dashboard")}
-                  data-testid="btn-cancel"
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setLocation("/painel")}
+                  data-testid="btn-cancelar"
                 >
-                  Cancel
+                  Cancelar
                 </Button>
-                <Button 
-                  type="submit" 
-                  disabled={createProject.isPending}
+                <Button
+                  type="submit"
+                  disabled={criarProjeto.isPending}
                   className="gap-2"
-                  data-testid="btn-create-project"
+                  data-testid="btn-criar-projeto"
                 >
-                  {createProject.isPending ? "Initializing..." : "Create Project"}
-                  {!createProject.isPending && <ArrowRight className="w-4 h-4" />}
+                  {criarProjeto.isPending ? "Criando..." : "Criar Projeto"}
+                  {!criarProjeto.isPending && <ArrowRight className="w-4 h-4" />}
                 </Button>
               </div>
             </form>

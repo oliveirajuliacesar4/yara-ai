@@ -1,10 +1,10 @@
 import { createContext, useContext, ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGetMe, useLogin, useRegister, useLogout, getGetMeQueryKey } from "@workspace/api-client-react";
-import type { User, LoginInput, RegisterInput } from "@workspace/api-client-react";
+import type { User } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 
-type AuthContextType = {
+type ContextoAutenticacao = {
   user: User | null;
   isLoading: boolean;
   login: ReturnType<typeof useLogin>["mutateAsync"];
@@ -12,78 +12,76 @@ type AuthContextType = {
   logout: ReturnType<typeof useLogout>["mutateAsync"];
 };
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const ContextoAuth = createContext<ContextoAutenticacao | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: user, isLoading, error } = useGetMe({
-    query: {
-      retry: false,
-    }
+  const { data: user, isLoading } = useGetMe({
+    query: { retry: false }
   });
 
-  const loginMutation = useLogin({
+  const mutacaoLogin = useLogin({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
-        toast({ title: "Welcome back" });
+        toast({ title: "Bem-vindo de volta!" });
       },
-      onError: (err) => {
+      onError: (err: any) => {
         toast({
-          title: "Login failed",
-          description: err?.error || "Unknown error occurred",
+          title: "Falha ao entrar",
+          description: err?.error || "Erro desconhecido",
           variant: "destructive",
         });
       },
     },
   });
 
-  const registerMutation = useRegister({
+  const mutacaoCadastro = useRegister({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
-        toast({ title: "Account created successfully" });
+        toast({ title: "Conta criada com sucesso!" });
       },
-      onError: (err) => {
+      onError: (err: any) => {
         toast({
-          title: "Registration failed",
-          description: err?.error || "Unknown error occurred",
+          title: "Falha no cadastro",
+          description: err?.error || "Erro desconhecido",
           variant: "destructive",
         });
       },
     },
   });
 
-  const logoutMutation = useLogout({
+  const mutacaoSair = useLogout({
     mutation: {
       onSuccess: () => {
         queryClient.setQueryData(getGetMeQueryKey(), null);
-        toast({ title: "Logged out successfully" });
+        toast({ title: "Sessão encerrada com sucesso." });
       },
     },
   });
 
   return (
-    <AuthContext.Provider
+    <ContextoAuth.Provider
       value={{
         user: user ?? null,
         isLoading,
-        login: loginMutation.mutateAsync,
-        register: registerMutation.mutateAsync,
-        logout: logoutMutation.mutateAsync,
+        login: mutacaoLogin.mutateAsync,
+        register: mutacaoCadastro.mutateAsync,
+        logout: mutacaoSair.mutateAsync,
       }}
     >
       {children}
-    </AuthContext.Provider>
+    </ContextoAuth.Provider>
   );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+  const contexto = useContext(ContextoAuth);
+  if (!contexto) {
+    throw new Error("useAuth deve ser usado dentro de AuthProvider");
   }
-  return context;
+  return contexto;
 }
