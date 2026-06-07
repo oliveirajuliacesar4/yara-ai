@@ -1,0 +1,273 @@
+🧠 GPT YARA — SISTEMA COMPLETO SUPREMO (VERSÃO FINAL MASTER)
+
+🚨 INSTRUÇÃO CRÍTICA PARA A IA
+
+Siga este prompt EXATAMENTE como está.
+
+- NÃO simplifique
+- NÃO pule etapas
+- NÃO gere código incompleto
+- Execute em ordem
+
+---
+
+📌 ETAPA 1 — IDENTIDADE DO SISTEMA
+
+Nome oficial:
+
+👉 GPT YARA
+
+Substituir qualquer nome como:
+
+- Gerador de Sistemas IA
+
+Aplicar em:
+
+- Interface
+- Sidebar
+- Logs
+- Painel
+- Projeto
+
+---
+
+📌 ETAPA 2 — OBJETIVO
+
+Criar plataforma que:
+
+- entende usuário
+- cria sistemas completos
+- corrige erros automaticamente
+- aprende com uso
+- roda fora do Replit
+
+---
+
+📌 ETAPA 3 — ESTRUTURA
+
+/backend
+/frontend
+/docs
+/training
+/database
+/logs
+
+---
+
+📌 ETAPA 4 — BACKEND
+
+- Node.js + Express
+- Porta: process.env.PORT || 3000
+
+Segurança:
+
+- JWT
+- bcrypt
+
+---
+
+📌 ETAPA 5 — BANCO DE DADOS
+
+Funções:
+
+- exportar banco
+- importar banco
+- backup automático
+
+Rotas:
+
+GET /api/db/export
+POST /api/db/import
+
+---
+
+📌 ETAPA 6 — USUÁRIOS
+
+Tipos:
+
+- MASTER
+- ADMIN
+- USER
+
+Regras:
+
+- MASTER cria ADMIN
+- ADMIN não cria ADMIN
+
+---
+
+📌 ETAPA 7 — GITHUB MULTI-USUÁRIO
+
+Cada usuário:
+
+- usa seu próprio token
+- token criptografado
+- nunca exposto
+
+Funções:
+
+- criar repo
+- commit
+- push
+- pull
+
+---
+
+📌 ETAPA 8 — IA PRINCIPAL
+
+Funções:
+
+- responder
+- gerar código
+- corrigir código
+- melhorar código
+
+---
+
+📌 ETAPA 9 — TREINAMENTO
+
+Criar:
+
+/training
+
+Funções:
+
+- ensinar IA
+- salvar conhecimento
+
+---
+
+📌 ETAPA 10 — AUTO-APRENDIZADO
+
+IA aprende com:
+
+- erros
+- comandos
+- melhorias
+
+---
+
+📌 ETAPA 11 — PREVENÇÃO DE ERROS
+
+Antes de executar:
+
+1. revisar código
+2. revisar novamente
+3. revisar segurança
+
+---
+
+📌 ETAPA 12 — AUTO-CORREÇÃO
+
+Se erro:
+
+- detectar
+- identificar linha
+- corrigir
+- salvar
+- continuar
+
+---
+
+📌 ETAPA 13 — PIPELINE
+
+Fluxo:
+
+Memória → Geração → Extração → Validação → Refinamento → Validação → Aprendizado
+
+Se falhar:
+
+→ corrigir
+→ reexecutar
+
+---
+
+📌 ETAPA 14 — PAINEL ADMIN
+
+Seções:
+
+- Código
+- Banco
+- IA
+- Treinamento
+- GitHub
+- Exportação
+
+---
+
+📌 ETAPA 15 — EXPOSIÇÃO TOTAL
+
+- mostrar todos arquivos
+- permitir edição
+
+---
+
+📌 ETAPA 16 — ERROS
+
+IA deve:
+
+- detectar
+- explicar
+- corrigir automaticamente
+
+---
+
+📌 ETAPA 17 — LOGS
+
+Salvar:
+
+- erros
+- correções
+- execuções
+
+---
+
+📌 ETAPA 18 — EXPORTAÇÃO
+
+GET /api/export
+
+Gerar ZIP com:
+
+- backend
+- frontend
+- banco
+- configs
+
+---
+
+📌 ETAPA 19 — FRONTEND
+
+- estilo ChatGPT
+- dark mode (#0d1117)
+- responsivo
+
+---
+
+📌 ETAPA 20 — EXECUÇÃO
+
+npm install
+npm run dev
+
+---
+
+💀 MODO RIGOR TOTAL
+
+Se erro:
+
+→ corrigir
+→ continuar
+→ nunca parar
+
+---
+
+🚀 RESULTADO FINAL
+
+GPT YARA deve ser:
+
+- autônoma
+- inteligente
+- treinável
+- independente
+- com auto-correção
+- com GitHub por usuário
+- com controle total do sistema

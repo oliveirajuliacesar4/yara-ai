@@ -1,0 +1,277 @@
+🧠 GPT YARA — SISTEMA COMPLETO SUPREMO (VERSÃO FINAL ABSOLUTA)
+
+🎯 MISSÃO
+
+Gerar o sistema completo da YARA, criando uma plataforma profissional totalmente funcional com:
+
+- Backend completo
+- Frontend estilo ChatGPT
+- Painel DEV integrado
+- Integração com Git
+- Exportação completa em ZIP
+
+Tudo deve rodar localmente (Termux ou VPS), sem dependência do Replit.
+
+---
+
+🛑 REGRA CRÍTICA (ANTI-DEPENDÊNCIA)
+
+É PROIBIDO:
+
+- Depender do Replit
+- Usar caminhos internos da plataforma
+- Gerar código que funcione apenas online
+
+Se isso acontecer:
+→ corrigir automaticamente até funcionar localmente
+
+---
+
+🧠 MODO ENGENHEIRO SÊNIOR
+
+- Pensar antes de responder
+- Planejar estrutura completa
+- Revisar código
+- Garantir funcionamento real
+- Nunca gerar código incompleto
+
+---
+
+🧱 ESTRUTURA DO PROJETO
+
+/backend
+/frontend
+/docs
+
+---
+
+⚙️ BACKEND (OBRIGATÓRIO)
+
+- Node.js + Express
+- Porta dinâmica:
+  process.env.PORT || 3000
+
+🔐 Segurança:
+
+- JWT
+- bcrypt
+
+---
+
+🧬 INTEGRAÇÃO COM GIT (OBRIGATÓRIO)
+
+O sistema deve implementar controle de versão completo:
+
+- git init automático
+- git add automático
+- commit automático
+- push para GitHub
+- pull de atualizações
+- suporte a branches
+
+📁 Criar módulo:
+
+/backend/git.js
+
+Funções obrigatórias:
+
+- initRepo()
+- addAll()
+- commit(msg)
+- push()
+- pull()
+
+🔐 Segurança:
+
+- usar variáveis de ambiente (.env)
+- nunca expor token no frontend
+
+---
+
+🎨 FRONTEND (ESTILO CHATGPT)
+
+- React.js
+
+Layout obrigatório:
+
+- Sidebar lateral
+- Área de chat
+- Input fixo inferior
+
+Funcionalidades:
+
+- mensagens (usuário direita / IA esquerda)
+- scroll automático
+- botão “Nova conversa”
+
+Design:
+
+- dark mode (#0d1117)
+- interface moderna
+- responsivo
+
+---
+
+🧠 IA (OBRIGATÓRIO)
+
+- Integração com API de IA (OpenAI ou similar)
+
+Funções:
+
+- responder usuário
+- gerar código
+- corrigir código
+- melhorar código existente
+
+---
+
+🛠️ PAINEL DEV (AUTO-PROGRAMAÇÃO)
+
+Criar sistema interno que permita:
+
+- listar arquivos
+- abrir arquivos
+- editar código
+- salvar alterações
+
+🤖 Integração com IA:
+
+Permitir comandos como:
+
+- melhorar código
+- corrigir erro
+- otimizar sistema
+- refatorar arquivos
+
+Fluxo:
+
+1. Ler código
+2. Enviar para IA
+3. Gerar versão melhorada
+4. Criar backup automático
+5. Aplicar alteração
+
+---
+
+📦 EXPORTAÇÃO ZIP (OBRIGATÓRIO E CRÍTICO)
+
+O sistema deve gerar um arquivo ZIP contendo:
+
+- backend completo
+- frontend completo
+- docs
+- README.md
+- package.json
+- .env.example
+
+🚨 OBRIGATÓRIO:
+
+- Criar rota:
+  GET /api/export
+
+- Gerar ZIP automaticamente
+
+- Permitir download direto
+
+- Compatível com celular
+
+---
+
+📥 ENTREGA FINAL (CRÍTICA)
+
+Ao finalizar, a IA DEVE:
+
+1. Gerar todos os arquivos
+2. Organizar corretamente
+3. Compactar tudo em ZIP
+4. Disponibilizar link ou botão de download
+
+👉 OBJETIVO:
+Permitir baixar o sistema completo direto no celular
+
+---
+
+🧬 INTEGRAÇÃO IA + SISTEMA (AVANÇADO)
+
+A IA deve ser capaz de executar comandos como:
+
+- "corrigir sistema"
+- "melhorar código"
+- "salvar alterações"
+- "fazer commit"
+- "enviar para GitHub"
+- "exportar sistema"
+
+Fluxo:
+
+1. IA interpreta comando
+2. Backend executa ação
+3. Retorna resultado
+
+---
+
+🌐 EXECUÇÃO
+
+Desenvolvimento:
+
+npm install
+npm run dev
+
+Produção:
+
+npm start
+
+---
+
+🚀 COMPATIBILIDADE
+
+O sistema DEVE rodar em:
+
+- Termux
+- VPS Linux
+
+---
+
+⚡ PERFORMANCE
+
+- código limpo
+- estrutura organizada
+- sem redundâncias
+- otimizado
+
+---
+
+⚠️ REGRAS FINAIS
+
+- Nunca gerar código incompleto
+- Garantir funcionamento real
+- Sistema deve rodar fora do Replit
+- Sempre entregar versão funcional
+
+---
+
+💀 MODO RIGOR TOTAL
+
+Se houver erro:
+
+→ corrigir automaticamente
+→ continuar até funcionar
+→ nunca parar incompleto
+
+---
+
+🚀 COMANDO FINAL
+
+Gerar o sistema completo da YARA com:
+
+- Backend funcional (Node.js + Express)
+- Frontend estilo ChatGPT (React)
+- Painel DEV funcional
+- Integração com Git
+- Exportação ZIP pronta
+
+---
+
+🎯 RESULTADO ESPERADO
+
+Sistema completo, funcional, independente, exportável e pronto para rodar localmente.
