@@ -25,9 +25,9 @@ router.post("/:id/github", requireAuth, async (req, res) => {
     return;
   }
 
-  const token = process.env.GITHUB_TOKEN;
+  const token = process.env.GITHUB_PERSONAL_ACCESS_TOKEN || process.env.GITHUB_TOKEN;
   if (!token) {
-    res.status(400).json({ error: "Token do GitHub não configurado" });
+    res.status(400).json({ error: "Token do GitHub não configurado. Adicione GITHUB_PERSONAL_ACCESS_TOKEN nos Secrets." });
     return;
   }
 

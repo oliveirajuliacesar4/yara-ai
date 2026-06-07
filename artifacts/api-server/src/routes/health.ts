@@ -8,4 +8,12 @@ router.get("/healthz", (_req, res) => {
   res.json(data);
 });
 
+router.get("/status", (_req, res) => {
+  res.json({
+    openai: !!process.env.OPENAI_API_KEY,
+    github: !!(process.env.GITHUB_PERSONAL_ACCESS_TOKEN || process.env.GITHUB_TOKEN),
+    database: !!process.env.DATABASE_URL,
+  });
+});
+
 export default router;

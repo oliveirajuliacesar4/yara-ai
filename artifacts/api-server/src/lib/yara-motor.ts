@@ -28,7 +28,11 @@ export type ResultadoGeracao = {
 
 function getOpenAI(): OpenAI {
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error("OPENAI_API_KEY não configurada");
+  if (!apiKey) {
+    throw new Error(
+      "OPENAI_API_KEY não configurada. Adicione a chave da OpenAI nas variáveis de ambiente do Replit (Secrets) com o nome OPENAI_API_KEY."
+    );
+  }
   return new OpenAI({ apiKey });
 }
 

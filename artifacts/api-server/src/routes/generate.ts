@@ -19,6 +19,14 @@ router.post("/:id/generate", requireAuth, async (req, res) => {
   const userId = (req.session as any).userId;
   const id = Number(req.params.id);
 
+  // Validar OPENAI_API_KEY antes de qualquer coisa
+  if (!process.env.OPENAI_API_KEY) {
+    res.status(400).json({
+      error: "OPENAI_API_KEY não configurada. Adicione sua chave da OpenAI nos Secrets do Replit com o nome OPENAI_API_KEY."
+    });
+    return;
+  }
+
   const [projeto] = await db
     .select()
     .from(projectsTable)
