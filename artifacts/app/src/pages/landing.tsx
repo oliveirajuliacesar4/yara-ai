@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Cpu, Code2, Brain, ShieldCheck, Github } from "lucide-react";
+import { Code2, Brain, ShieldCheck, Github } from "lucide-react";
 
 const esquemaLogin = z.object({
   email: z.string().email("E-mail inválido"),
@@ -54,10 +54,13 @@ export default function PaginaInicial() {
       <div className="flex-1 max-w-lg space-y-6">
         {/* Logo YARA */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center yara-glow">
-            <Cpu className="w-5 h-5 text-primary" />
+          <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 avatar-glow">
+            <img src="/images/logo-yara.png" alt="YARA Logo" className="w-full h-full object-cover" />
           </div>
-          <span className="font-mono font-bold text-2xl tracking-tight yara-gradient-text">YARA</span>
+          <div>
+            <span className="font-bold text-2xl tracking-wide yara-gradient-text">GPT YARA</span>
+            <div className="text-[11px] text-muted-foreground font-mono tracking-widest">SUA INTELIGÊNCIA. SEM LIMITES.</div>
+          </div>
         </div>
 
         <h1 className="text-4xl md:text-5xl font-sans font-bold tracking-tight text-foreground leading-tight">
