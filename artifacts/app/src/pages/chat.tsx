@@ -1,10 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRoute, useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import {
-  MessageSquare, Plus, Trash2, Send, User, Loader2, X, Brain, Settings
+  MessageSquare, Plus, Trash2, Send, Loader2, X,
+  Brain, Settings, Star, FolderOpen, History,
+  Search, MoreVertical, Paperclip, ChevronDown,
+  Monitor, Globe, LayoutDashboard, Database, Smartphone,
+  MoreHorizontal, ChevronRight, Zap, LogOut, Sun, Moon,
+  Code2, Cpu
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
@@ -31,10 +36,26 @@ type StreamingMessage = {
   isStreaming?: boolean;
 };
 
+const TIPOS_SISTEMA = [
+  { icone: Globe, label: "Web App" },
+  { icone: Code2, label: "API REST" },
+  { icone: LayoutDashboard, label: "Dashboard" },
+  { icone: Database, label: "Banco de Dados" },
+  { icone: Smartphone, label: "Mobile App" },
+  { icone: MoreHorizontal, label: "E muito mais" },
+];
+
+const ACOES_RAPIDAS = [
+  "Me ajude a criar um projeto",
+  "Analisar dados",
+  "Resumo inteligente",
+];
+
 export default function Chat() {
   const [, params] = useRoute("/chat/:id");
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { user, logout } = useAuth();
 
   const conversationId = params?.id ? Number(params.id) : null;
 
@@ -45,6 +66,7 @@ export default function Chat() {
   const [enviando, setEnviando] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [sidebarAberta, setSidebarAberta] = useState(false);
+  const [menuAberto, setMenuAberto] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -84,11 +106,8 @@ export default function Chat() {
   const novaConversa = async () => {
     setSidebarAberta(false);
     try {
-      const res = await fetch("/api/chat/conversations", {
-        method: "POST",
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("Falha ao criar conversa");
+      const res = await fetch("/api/chat/conversations", { method: "POST", credentials: "include" });
+      if (!res.ok) throw new Error();
       const nova: Conversation = await res.json();
       setConversations((prev) => [nova, ...prev]);
       navigate(`/chat/${nova.id}`);
@@ -101,50 +120,60 @@ export default function Chat() {
     e.preventDefault();
     e.stopPropagation();
     try {
-      await fetch(`/api/chat/conversations/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      await fetch(`/api/chat/conversations/${id}`, { method: "DELETE", credentials: "include" });
       setConversations((prev) => prev.filter((c) => c.id !== id));
       if (conversationId === id) navigate("/chat");
     } catch {
-      toast({ title: "Erro ao deletar conversa", variant: "destructive" });
+      toast({ title: "Erro ao deletar", variant: "destructive" });
     }
   };
 
-  const enviarMensagem = async () => {
-    if (!input.trim() || enviando || !conversationId) return;
+  const enviarMensagem = async (texto?: string) => {
+    const conteudo = texto ?? input.trim();
+    if (!conteudo || enviando) return;
 
-    const textoUsuario = input.trim();
+    // Se não há conversa, cria uma
+    let convId = conversationId;
+    if (!convId) {
+      try {
+        const res = await fetch("/api/chat/conversations", { method: "POST", credentials: "include" });
+        if (!res.ok) throw new Error();
+        const nova: Conversation = await res.json();
+        setConversations((prev) => [nova, ...prev]);
+        navigate(`/chat/${nova.id}`);
+        convId = nova.id;
+        await new Promise(r => setTimeout(r, 50));
+      } catch {
+        toast({ title: "Erro ao criar conversa", variant: "destructive" });
+        return;
+      }
+    }
+
     setInput("");
     setEnviando(true);
-
-    const msgUsuario: StreamingMessage = { role: "user", content: textoUsuario };
-    setMessages((prev) => [...prev, msgUsuario]);
-
-    const msgIA: StreamingMessage = { role: "model", content: "", isStreaming: true };
-    setMessages((prev) => [...prev, msgIA]);
+    setMessages((prev) => [...prev, { role: "user", content: conteudo }]);
+    setMessages((prev) => [...prev, { role: "model", content: "", isStreaming: true }]);
 
     abortRef.current = new AbortController();
 
     try {
-      const res = await fetch(`/api/chat/conversations/${conversationId}/messages`, {
+      const res = await fetch(`/api/chat/conversations/${convId}/messages`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: textoUsuario }),
+        body: JSON.stringify({ content: conteudo }),
         signal: abortRef.current.signal,
       });
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || "Erro ao enviar mensagem");
+        throw new Error(err.error || "Erro ao enviar");
       }
 
       const reader = res.body!.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
-      let respostaCompleta = "";
+      let resposta = "";
 
       while (true) {
         const { done, value } = await reader.read();
@@ -157,34 +186,27 @@ export default function Chat() {
         for (const linha of linhas) {
           if (!linha.startsWith("data: ")) continue;
           try {
-            const evento = JSON.parse(linha.slice(6));
-
-            if (evento.type === "chunk") {
-              respostaCompleta += evento.content;
+            const ev = JSON.parse(linha.slice(6));
+            if (ev.type === "chunk") {
+              resposta += ev.content;
               setMessages((prev) => {
-                const novo = [...prev];
-                const idx = novo.findLastIndex((m) => (m as StreamingMessage).isStreaming);
-                if (idx !== -1) {
-                  novo[idx] = { role: "model", content: respostaCompleta, isStreaming: true };
-                }
-                return novo;
+                const n = [...prev];
+                const idx = n.findLastIndex((m) => (m as StreamingMessage).isStreaming);
+                if (idx !== -1) n[idx] = { role: "model", content: resposta, isStreaming: true };
+                return n;
               });
-            } else if (evento.type === "title") {
-              setConversations((prev) =>
-                prev.map((c) => c.id === conversationId ? { ...c, title: evento.title } : c)
-              );
-              setConversa((prev) => prev ? { ...prev, title: evento.title } : prev);
-            } else if (evento.type === "done") {
+            } else if (ev.type === "title") {
+              setConversations((prev) => prev.map((c) => c.id === convId ? { ...c, title: ev.title } : c));
+              setConversa((prev) => prev ? { ...prev, title: ev.title } : prev);
+            } else if (ev.type === "done") {
               setMessages((prev) => {
-                const novo = [...prev];
-                const idx = novo.findLastIndex((m) => (m as StreamingMessage).isStreaming);
-                if (idx !== -1) {
-                  novo[idx] = { role: "model", content: respostaCompleta, isStreaming: false } as StreamingMessage;
-                }
-                return novo;
+                const n = [...prev];
+                const idx = n.findLastIndex((m) => (m as StreamingMessage).isStreaming);
+                if (idx !== -1) n[idx] = { role: "model", content: resposta, isStreaming: false } as StreamingMessage;
+                return n;
               });
-            } else if (evento.type === "error") {
-              throw new Error(evento.message);
+            } else if (ev.type === "error") {
+              throw new Error(ev.message);
             }
           } catch { }
         }
@@ -194,431 +216,527 @@ export default function Chat() {
     } catch (err: any) {
       if (err.name === "AbortError") return;
       setMessages((prev) => prev.filter((m) => !(m as StreamingMessage).isStreaming));
-      toast({
-        title: "Erro ao enviar mensagem",
-        description: err.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erro ao enviar mensagem", description: err.message, variant: "destructive" });
     } finally {
       setEnviando(false);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      enviarMensagem();
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); enviarMensagem(); }
   };
 
-  const formatarData = (iso: string) => {
+  const formatHora = (iso: string) => new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
+  const formatData = (iso: string) => {
     const d = new Date(iso);
     const hoje = new Date();
-    const diff = Math.floor((hoje.getTime() - d.getTime()) / 1000 / 60 / 60 / 24);
-    if (diff === 0) return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    const diff = Math.floor((hoje.getTime() - d.getTime()) / 86400000);
+    if (diff === 0) return formatHora(iso);
     if (diff === 1) return "Ontem";
     if (diff < 7) return d.toLocaleDateString("pt-BR", { weekday: "short" });
     return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
   };
 
-  return (
-    <div className="flex h-full overflow-hidden relative" style={{ background: "hsl(222 47% 2%)" }}>
+  const nomeUsuario = user?.email?.split("@")[0] ?? "Usuário";
+  const inicialUsuario = (user?.email?.[0] ?? "U").toUpperCase();
 
-      {/* SIDEBAR OVERLAY MOBILE */}
-      {sidebarAberta && (
-        <div
-          className="fixed inset-0 z-30 md:hidden bg-black/60 backdrop-blur-sm"
-          onClick={() => setSidebarAberta(false)}
-        />
-      )}
-
-      {/* SIDEBAR */}
-      <aside
-        className={`
-          fixed md:relative z-40 md:z-auto
-          flex-shrink-0 flex flex-col
-          border-r h-full
-          transition-all duration-300 ease-in-out
-          ${sidebarAberta ? "translate-x-0 w-72" : "-translate-x-full md:translate-x-0 w-72 md:w-64"}
-        `}
-        style={{
-          background: "hsl(222 40% 4%)",
-          borderRightColor: "hsl(210 100% 56% / 0.12)",
-        }}
-      >
-        {/* Header sidebar */}
-        <div className="p-3 border-b flex items-center gap-2" style={{ borderBottomColor: "hsl(210 100% 56% / 0.12)" }}>
-          <button
-            onClick={novaConversa}
-            className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all"
-            style={{
-              background: "hsl(210 100% 56% / 0.1)",
-              border: "1px solid hsl(210 100% 56% / 0.2)",
-              color: "hsl(210 100% 70%)",
-            }}
-          >
-            <Plus className="w-4 h-4" />
-            Nova Conversa
-          </button>
-          <button
-            className="md:hidden h-8 w-8 rounded-lg flex items-center justify-center hover:bg-secondary transition-colors text-muted-foreground"
-            onClick={() => setSidebarAberta(false)}
-          >
-            <X className="w-4 h-4" />
-          </button>
+  // ── SIDEBAR ESQUERDA ───────────────────────────────────────────────────
+  const Sidebar = () => (
+    <aside
+      className="flex flex-col h-full w-[220px] shrink-0 border-r"
+      style={{ background: "hsl(220 40% 5%)", borderRightColor: "hsl(210 100% 56% / 0.1)" }}
+    >
+      {/* Avatar YARA */}
+      <div className="flex flex-col items-center pt-6 pb-4 px-4 border-b" style={{ borderBottomColor: "hsl(210 100% 56% / 0.1)" }}>
+        <div className="w-20 h-20 rounded-full overflow-hidden mb-3 avatar-glow">
+          <img src="/images/yara-avatar.png" alt="YARA" className="w-full h-full object-cover" />
         </div>
-
-        {/* Links rápidos */}
-        <div className="px-3 py-2 border-b" style={{ borderBottomColor: "hsl(210 100% 56% / 0.08)" }}>
-          <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50 px-2 mb-1">Menu</div>
-          <button
-            onClick={() => { navigate("/memoria"); setSidebarAberta(false); }}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-          >
-            <Brain className="w-4 h-4" />
-            Memória
-          </button>
-          <button
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-          >
-            <Settings className="w-4 h-4" />
-            Configurações
-          </button>
+        <div className="text-center">
+          <div className="font-bold text-lg yara-gradient-text tracking-wider">YARA</div>
+          <div className="text-[9px] font-mono tracking-widest text-muted-foreground/60 mt-0.5">
+            SUA INTELIGÊNCIA. <span style={{ color: "hsl(210 100% 60%)" }}>SEM LIMITES.</span>
+          </div>
         </div>
+      </div>
 
-        {/* Lista de conversas */}
-        <div className="px-2 py-2">
-          <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50 px-2 mb-1">Conversas</div>
-        </div>
-        <nav className="flex-1 overflow-y-auto px-2 pb-2 space-y-0.5">
-          {conversations.length === 0 ? (
-            <div className="text-center text-muted-foreground text-xs px-4 py-8">
-              <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-20" />
-              Nenhuma conversa ainda.
-            </div>
-          ) : (
-            conversations.map((conv) => {
+      {/* Botão Nova Conversa */}
+      <div className="p-3">
+        <button
+          onClick={novaConversa}
+          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl font-semibold text-sm transition-all"
+          style={{ background: "hsl(210 100% 56% / 0.15)", border: "1px solid hsl(210 100% 56% / 0.3)", color: "hsl(210 100% 70%)" }}
+        >
+          <MessageSquare className="w-4 h-4" />
+          Nova Conversa
+        </button>
+      </div>
+
+      {/* Navegação */}
+      <nav className="flex-1 overflow-y-auto px-2 space-y-0.5">
+        {[
+          { label: "Memória", icone: Brain, href: "/memoria" },
+          { label: "Gerador de Sistemas", icone: Cpu, href: "/painel" },
+          { label: "Meus Projetos", icone: FolderOpen, href: "/painel" },
+          { label: "Histórico de Conversas", icone: History, href: "/chat" },
+          { label: "Favoritos", icone: Star, href: "/chat" },
+          { label: "Configurações", icone: Settings, href: "/chat" },
+        ].map(({ label, icone: Icon, href }) => {
+          const ativo = label === "Histórico de Conversas" && window.location.pathname.includes("/chat");
+          return (
+            <button
+              key={label}
+              onClick={() => { navigate(href); setSidebarAberta(false); }}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all text-left ${ativo ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              style={ativo ? { background: "hsl(210 100% 56% / 0.12)", border: "1px solid hsl(210 100% 56% / 0.2)" } : {}}
+            >
+              <Icon className="w-4 h-4 shrink-0" />
+              <span className="truncate">{label}</span>
+            </button>
+          );
+        })}
+
+        {/* Conversas recentes */}
+        {conversations.length > 0 && (
+          <div className="pt-3">
+            <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/40 px-3 mb-1">Recentes</div>
+            {conversations.slice(0, 6).map((conv) => {
               const ativa = conv.id === conversationId;
               return (
                 <div
                   key={conv.id}
                   onClick={() => { navigate(`/chat/${conv.id}`); setSidebarAberta(false); }}
-                  className={`group relative flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all text-sm`}
-                  style={ativa ? {
-                    background: "hsl(210 100% 56% / 0.12)",
-                    border: "1px solid hsl(210 100% 56% / 0.2)",
-                    color: "hsl(210 100% 70%)",
-                  } : {}}
+                  className="group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-all"
+                  style={ativa ? { background: "hsl(210 100% 56% / 0.1)", color: "hsl(210 100% 65%)" } : {}}
                 >
-                  {!ativa && (
-                    <style>{`.conv-${conv.id}:hover { background: hsl(222 30% 9%); }`}</style>
-                  )}
-                  <MessageSquare className="w-3.5 h-3.5 shrink-0 opacity-50" />
-                  <div className="flex-1 min-w-0">
-                    <div className="truncate font-medium text-xs leading-tight">
-                      {conv.title}
-                    </div>
-                    <div className="text-[10px] opacity-40 mt-0.5">{formatarData(conv.updatedAt)}</div>
-                  </div>
+                  <MessageSquare className="w-3 h-3 shrink-0 opacity-40" />
+                  <span className="flex-1 truncate text-xs text-muted-foreground group-hover:text-foreground transition-colors">{conv.title}</span>
                   <button
                     onClick={(e) => deletarConversa(conv.id, e)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:text-red-400"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-400"
                   >
-                    <Trash2 className="w-3 h-3" />
+                    <X className="w-3 h-3" />
                   </button>
                 </div>
               );
-            })
-          )}
-        </nav>
-      </aside>
+            })}
+          </div>
+        )}
+      </nav>
 
-      {/* ÁREA PRINCIPAL */}
+      {/* Card Upgrade */}
+      <div className="mx-3 mb-3 p-3 rounded-xl border" style={{ background: "hsl(220 40% 7%)", borderColor: "hsl(210 100% 56% / 0.15)" }}>
+        <div className="flex items-center gap-2 mb-2">
+          <Zap className="w-4 h-4 shrink-0" style={{ color: "hsl(210 100% 60%)" }} />
+          <span className="text-xs text-muted-foreground">Desbloqueie todo o potencial da YARA</span>
+        </div>
+        <button
+          className="w-full py-1.5 rounded-lg text-xs font-semibold transition-all"
+          style={{ background: "hsl(210 100% 56% / 0.15)", border: "1px solid hsl(210 100% 56% / 0.3)", color: "hsl(210 100% 70%)" }}
+        >
+          Upgrade
+        </button>
+      </div>
+
+      {/* Usuário */}
+      <div className="border-t p-3" style={{ borderTopColor: "hsl(210 100% 56% / 0.1)" }}>
+        <div className="flex items-center gap-2.5 px-1 py-1 rounded-lg hover:bg-secondary transition-colors cursor-pointer">
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+            style={{ background: "hsl(210 100% 56% / 0.15)", color: "hsl(210 100% 70%)", border: "1px solid hsl(210 100% 56% / 0.25)" }}
+          >
+            {inicialUsuario}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-semibold truncate capitalize">{nomeUsuario}</div>
+            <div className="text-[10px] text-muted-foreground truncate">{user?.email}</div>
+          </div>
+          <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+        </div>
+        <div className="flex items-center justify-between mt-2 px-1">
+          <button className="p-1.5 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground">
+            <Sun className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={() => logout()}
+            className="p-1.5 rounded-lg hover:bg-destructive/10 hover:text-red-400 transition-colors text-muted-foreground"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    </aside>
+  );
+
+  // ── PAINEL DIREITO ─────────────────────────────────────────────────────
+  const PainelDireito = () => (
+    <aside
+      className="hidden xl:flex flex-col w-[260px] shrink-0 border-l overflow-y-auto"
+      style={{ background: "hsl(220 40% 4%)", borderLeftColor: "hsl(210 100% 56% / 0.1)" }}
+    >
+      {/* Gerador de Sistemas */}
+      <div className="p-4 border-b" style={{ borderBottomColor: "hsl(210 100% 56% / 0.08)" }}>
+        <div className="flex items-center justify-between mb-1">
+          <span className="font-semibold text-sm">Gerador de Sistemas</span>
+          <button className="text-[11px] transition-colors" style={{ color: "hsl(210 100% 65%)" }}>Ver todos</button>
+        </div>
+        <p className="text-[11px] text-muted-foreground mb-3">Crie sistemas completos com IA em segundos.</p>
+
+        <button
+          onClick={() => navigate("/projetos/novo")}
+          className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-semibold transition-all mb-3"
+          style={{ background: "hsl(210 100% 56%)", color: "hsl(222 47% 2%)" }}
+        >
+          <Plus className="w-4 h-4" />
+          Novo Sistema
+        </button>
+
+        <div className="grid grid-cols-3 gap-2">
+          {TIPOS_SISTEMA.map(({ icone: Icon, label }) => (
+            <button
+              key={label}
+              onClick={() => navigate("/projetos/novo")}
+              className="flex flex-col items-center gap-1.5 p-2 rounded-xl text-center transition-all group"
+              style={{ background: "hsl(222 40% 7%)", border: "1px solid hsl(220 25% 12%)" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsl(210 100% 56% / 0.3)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsl(220 25% 12%)"; }}
+            >
+              <Icon className="w-5 h-5" style={{ color: "hsl(210 100% 65%)" }} />
+              <span className="text-[9px] text-muted-foreground leading-tight">{label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Atalhos Rápidos */}
+      <div className="p-4 border-b" style={{ borderBottomColor: "hsl(210 100% 56% / 0.08)" }}>
+        <div className="font-semibold text-sm mb-3">Atalhos Rápidos</div>
+        <div className="space-y-1">
+          {[
+            { label: "Meus Projetos", icone: FolderOpen, href: "/painel" },
+            { label: "Memória", icone: Brain, href: "/memoria" },
+            { label: "Histórico de Conversas", icone: History, href: "/chat" },
+            { label: "Favoritos", icone: Star, href: "/chat" },
+          ].map(({ label, icone: Icon, href }) => (
+            <button
+              key={label}
+              onClick={() => navigate(href)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-all text-left"
+            >
+              <Icon className="w-4 h-4 shrink-0" />
+              <span className="flex-1 truncate text-xs">{label}</span>
+              <ChevronRight className="w-3.5 h-3.5 opacity-40" />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Status YARA */}
+      <div className="p-4">
+        <div className="p-3 rounded-xl border" style={{ background: "hsl(222 40% 6%)", borderColor: "hsl(210 100% 56% / 0.12)" }}>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-2 h-2 rounded-full bg-green-400 yara-pulse" />
+            <span className="text-sm font-semibold">YARA Online</span>
+          </div>
+          <p className="text-[11px] text-muted-foreground mb-2">Pronta para ajudar você</p>
+          {/* Waveform SVG */}
+          <svg viewBox="0 0 220 30" className="w-full h-6 opacity-60">
+            <polyline
+              points="0,15 15,8 25,20 35,5 45,22 55,10 65,18 75,6 85,20 95,12 105,18 115,7 125,21 135,11 145,17 155,6 165,22 175,9 185,19 195,12 205,18 220,15"
+              fill="none"
+              stroke="hsl(210 100% 56%)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+      </div>
+    </aside>
+  );
+
+  return (
+    <div className="flex h-screen overflow-hidden" style={{ background: "hsl(222 47% 2%)" }}>
+
+      {/* OVERLAY MOBILE SIDEBAR */}
+      {sidebarAberta && (
+        <div className="fixed inset-0 z-30 md:hidden bg-black/70 backdrop-blur-sm" onClick={() => setSidebarAberta(false)} />
+      )}
+
+      {/* SIDEBAR ESQUERDA — desktop sempre visível, mobile overlay */}
+      <div className={`
+        fixed md:relative z-40 md:z-auto h-full
+        transition-transform duration-300 ease-in-out
+        ${sidebarAberta ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+      `}>
+        <Sidebar />
+      </div>
+
+      {/* CONTEÚDO CENTRAL */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
 
-        {/* Sub-header do chat */}
+        {/* SUB-HEADER do chat */}
         <div
           className="h-12 flex items-center px-4 gap-3 shrink-0 border-b"
-          style={{
-            background: "hsl(222 40% 4%)",
-            borderBottomColor: "hsl(210 100% 56% / 0.12)",
-          }}
+          style={{ background: "hsl(222 40% 4%)", borderBottomColor: "hsl(210 100% 56% / 0.1)" }}
         >
-          {/* Botão menu mobile */}
+          {/* Hambúrguer mobile */}
           <button
             className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg hover:bg-secondary transition-colors text-muted-foreground"
             onClick={() => setSidebarAberta(true)}
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
 
-          {/* Avatar YARA + título */}
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 avatar-glow">
-              <img
-                src="/images/yara-avatar.png"
-                alt="YARA"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="min-w-0">
-              <div className="font-semibold text-sm truncate">
-                {conversa ? conversa.title : "Chat com a YARA"}
-              </div>
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block yara-pulse" />
-                Online · Powered by Gemini
-              </div>
+          {/* Título da conversa */}
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <span className="font-semibold text-sm truncate">
+              {conversa?.title ?? "Nova Conversa"}
+            </span>
+            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+          </div>
+
+          {/* Ações direita */}
+          <div className="flex items-center gap-1">
+            <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-secondary transition-colors text-muted-foreground">
+              <Search className="w-4 h-4" />
+            </button>
+            <div className="relative">
+              <button
+                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-secondary transition-colors text-muted-foreground"
+                onClick={() => setMenuAberto(!menuAberto)}
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
+              {menuAberto && (
+                <div
+                  className="absolute right-0 top-full mt-1 w-52 rounded-xl shadow-2xl z-50 overflow-hidden py-1"
+                  style={{ background: "hsl(222 40% 7%)", border: "1px solid hsl(220 25% 12%)" }}
+                >
+                  {[
+                    { label: "Configurações", icone: Settings },
+                    { label: "Limpar chat", icone: Trash2 },
+                    { label: "Exportar conversa", icone: FolderOpen },
+                    { label: "Sobre", icone: Star },
+                  ].map(({ label, icone: Icon }) => (
+                    <button
+                      key={label}
+                      onClick={() => setMenuAberto(false)}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors text-left"
+                    >
+                      <Icon className="w-4 h-4" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Mensagens */}
+        {/* MENSAGENS */}
         <div className="flex-1 overflow-y-auto">
-          {!conversationId ? (
-            /* Tela inicial */
-            <div className="h-full flex flex-col items-center justify-center gap-6 p-6 text-center">
-              {/* Avatar grande */}
-              <div className="relative">
-                <div className="w-24 h-24 rounded-full overflow-hidden avatar-glow">
-                  <img
-                    src="/images/yara-avatar.png"
-                    alt="YARA Avatar"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-green-400 border-2 border-background flex items-center justify-center">
-                  <span className="w-2 h-2 rounded-full bg-green-300 yara-pulse" />
-                </span>
+          {carregando ? (
+            <div className="h-full flex items-center justify-center gap-3 text-muted-foreground">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span className="text-sm">Carregando...</span>
+            </div>
+          ) : messages.length === 0 ? (
+            /* Tela inicial vazia */
+            <div className="h-full flex flex-col items-center justify-center gap-5 p-6 text-center">
+              <div className="w-20 h-20 rounded-full overflow-hidden avatar-glow">
+                <img src="/images/yara-avatar.png" alt="YARA" className="w-full h-full object-cover" />
               </div>
-
               <div>
-                <h2 className="text-2xl font-bold mb-1">
-                  Olá! Sou a <span className="yara-gradient-text">YARA</span>
+                <h2 className="text-xl font-bold mb-1">
+                  Olá, <span className="capitalize">{nomeUsuario}</span>! 👋
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-sm">
-                  Sua inteligência sem limites. Tire dúvidas, peça código, análises e muito mais.
+                  Sou a YARA, sua inteligência sem limites. Como posso te ajudar hoje?
                 </p>
               </div>
-
-              {/* Sugestões */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-lg w-full">
-                {[
-                  "Como criar uma API REST com Node.js e TypeScript?",
-                  "Explique o padrão de arquitetura MVC",
-                  "Revise este código e sugira melhorias",
-                  "Qual banco de dados usar para meu projeto?",
-                ].map((sugestao) => (
+              {/* Ações rápidas */}
+              <div className="flex flex-wrap justify-center gap-2 mt-1">
+                {ACOES_RAPIDAS.map((acao) => (
                   <button
-                    key={sugestao}
-                    onClick={async () => {
-                      const res = await fetch("/api/chat/conversations", {
-                        method: "POST", credentials: "include",
-                      });
-                      if (!res.ok) return;
-                      const nova = await res.json();
-                      setConversations((prev) => [nova, ...prev]);
-                      navigate(`/chat/${nova.id}`);
-                      setTimeout(() => setInput(sugestao), 100);
-                    }}
-                    className="text-left p-3.5 rounded-xl border text-sm transition-all group"
+                    key={acao}
+                    onClick={() => enviarMensagem(acao)}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium transition-all"
                     style={{
-                      background: "hsl(222 40% 5%)",
-                      borderColor: "hsl(210 100% 56% / 0.15)",
+                      background: "hsl(222 40% 7%)",
+                      border: "1px solid hsl(210 100% 56% / 0.2)",
                       color: "hsl(210 15% 70%)",
                     }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.borderColor = "hsl(210 100% 56% / 0.35)";
-                      (e.currentTarget as HTMLElement).style.background = "hsl(210 100% 56% / 0.06)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.borderColor = "hsl(210 100% 56% / 0.15)";
-                      (e.currentTarget as HTMLElement).style.background = "hsl(222 40% 5%)";
-                    }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsl(210 100% 56% / 0.5)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsl(210 100% 56% / 0.2)"; }}
                   >
-                    {sugestao}
+                    <Zap className="w-3 h-3" style={{ color: "hsl(210 100% 60%)" }} />
+                    {acao}
                   </button>
                 ))}
               </div>
-
-              <button
-                onClick={novaConversa}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm transition-all"
-                style={{
-                  background: "hsl(210 100% 56%)",
-                  color: "hsl(222 47% 2%)",
-                }}
-              >
-                <Plus className="w-4 h-4" />
-                Iniciar conversa
-              </button>
-            </div>
-          ) : carregando ? (
-            <div className="h-full flex items-center justify-center gap-3 text-muted-foreground">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span className="text-sm">Carregando conversa...</span>
             </div>
           ) : (
-            <div className="max-w-3xl mx-auto px-4 py-6 space-y-5">
-              {messages.length === 0 && (
-                <div className="text-center text-muted-foreground text-sm py-12">
-                  <div className="w-12 h-12 rounded-full overflow-hidden mx-auto mb-3 opacity-40">
-                    <img src="/images/yara-avatar.png" alt="YARA" className="w-full h-full object-cover" />
+            <div className="max-w-3xl mx-auto px-4 py-5 space-y-4">
+              {/* Separador de data */}
+              {messages.length > 0 && (
+                <div className="flex items-center justify-center">
+                  <div className="text-[11px] text-muted-foreground/50 px-3 py-1 rounded-full border" style={{ borderColor: "hsl(220 25% 12%)", background: "hsl(222 40% 5%)" }}>
+                    {new Date().toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" })}
                   </div>
-                  Envie uma mensagem para começar a conversa
                 </div>
               )}
+
               {messages.map((msg, idx) => (
-                <MensagemBolha key={idx} msg={msg} />
+                <BolhaChat key={idx} msg={msg} />
               ))}
+
+              {/* Ações rápidas no final */}
+              {!enviando && messages.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {ACOES_RAPIDAS.map((acao) => (
+                    <button
+                      key={acao}
+                      onClick={() => enviarMensagem(acao)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                      style={{ background: "hsl(222 40% 7%)", border: "1px solid hsl(210 100% 56% / 0.15)", color: "hsl(210 15% 65%)" }}
+                    >
+                      <Zap className="w-3 h-3 opacity-60" />
+                      {acao}
+                    </button>
+                  ))}
+                </div>
+              )}
               <div ref={bottomRef} />
             </div>
           )}
         </div>
 
-        {/* Input area */}
-        {conversationId && (
-          <div
-            className="border-t p-4 shrink-0"
-            style={{
-              background: "hsl(222 40% 4%)",
-              borderTopColor: "hsl(210 100% 56% / 0.12)",
-            }}
-          >
-            <div className="max-w-3xl mx-auto">
-              <div
-                className="relative flex items-end gap-2 rounded-2xl p-2 transition-all input-neon"
-                style={{
-                  background: "hsl(222 40% 6%)",
-                  border: "1px solid hsl(220 25% 14%)",
-                }}
+        {/* INPUT */}
+        <div
+          className="border-t p-4 shrink-0"
+          style={{ background: "hsl(222 40% 4%)", borderTopColor: "hsl(210 100% 56% / 0.1)" }}
+        >
+          <div className="max-w-3xl mx-auto">
+            <div
+              className="flex items-end gap-2 rounded-2xl px-3 py-2 transition-all input-neon"
+              style={{ background: "hsl(222 40% 7%)", border: "1px solid hsl(220 25% 14%)" }}
+            >
+              <button className="mb-1 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors shrink-0">
+                <Paperclip className="w-4 h-4" />
+              </button>
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Digite sua mensagem..."
+                className="flex-1 min-h-[40px] max-h-[160px] resize-none border-0 bg-transparent p-1 focus-visible:ring-0 text-sm placeholder:text-muted-foreground/40"
+                disabled={enviando}
+                rows={1}
+              />
+              <button
+                onClick={() => enviarMensagem()}
+                disabled={enviando || !input.trim()}
+                className="mb-1 w-9 h-9 shrink-0 rounded-full flex items-center justify-center transition-all disabled:opacity-40"
+                style={{ background: "hsl(210 100% 56%)", color: "hsl(222 47% 2%)" }}
               >
-                <Textarea
-                  ref={textareaRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Mensagem para a YARA... (Enter para enviar)"
-                  className="flex-1 min-h-[44px] max-h-[180px] resize-none border-0 bg-transparent p-2 focus-visible:ring-0 text-sm placeholder:text-muted-foreground/50"
-                  disabled={enviando}
-                  rows={1}
-                />
-                <button
-                  onClick={enviarMensagem}
-                  disabled={enviando || !input.trim()}
-                  className="h-9 w-9 shrink-0 rounded-xl flex items-center justify-center transition-all disabled:opacity-40"
-                  style={{
-                    background: "hsl(210 100% 56%)",
-                    color: "hsl(222 47% 2%)",
-                  }}
-                >
-                  {enviando ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Send className="w-4 h-4" />
-                  )}
-                </button>
-              </div>
-              <p className="text-[10px] text-muted-foreground/40 text-center mt-2">
-                YARA · Powered by Google Gemini · Respostas podem conter erros — sempre revise
-              </p>
+                {enviando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              </button>
             </div>
+            <p className="text-[10px] text-muted-foreground/30 text-center mt-2">
+              YARA · Google Gemini · As respostas podem conter erros — revise antes de usar
+            </p>
           </div>
-        )}
+        </div>
       </div>
+
+      {/* PAINEL DIREITO */}
+      <PainelDireito />
     </div>
   );
 }
 
-function MensagemBolha({ msg }: { msg: ChatMessage | StreamingMessage }) {
+function BolhaChat({ msg }: { msg: ChatMessage | StreamingMessage }) {
   const isUser = msg.role === "user";
   const isStreaming = (msg as StreamingMessage).isStreaming;
+  const hora = (msg as ChatMessage).createdAt
+    ? new Date((msg as ChatMessage).createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+    : null;
 
   return (
     <div className={`flex gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
-
       {/* Avatar */}
       {isUser ? (
-        <div
-          className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs"
-          style={{
-            background: "hsl(210 100% 56% / 0.15)",
-            border: "1px solid hsl(210 100% 56% / 0.3)",
-            color: "hsl(210 100% 70%)",
-          }}
-        >
-          <User className="w-4 h-4" />
+        <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs"
+          style={{ background: "hsl(210 100% 56% / 0.15)", border: "1px solid hsl(210 100% 56% / 0.3)", color: "hsl(210 100% 70%)" }}>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
         </div>
       ) : (
         <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 mt-0.5 avatar-glow">
-          <img
-            src="/images/yara-avatar.png"
-            alt="YARA"
-            className="w-full h-full object-cover"
-          />
+          <img src="/images/yara-avatar.png" alt="YARA" className="w-full h-full object-cover" />
         </div>
       )}
 
-      {/* Balão */}
-      <div
-        className="max-w-[82%] rounded-2xl px-4 py-3 text-sm"
-        style={isUser ? {
-          background: "hsl(210 100% 56%)",
-          color: "hsl(222 47% 2%)",
-          borderTopRightRadius: "4px",
-        } : {
-          background: "hsl(222 40% 7%)",
-          border: "1px solid hsl(220 25% 12%)",
-          borderTopLeftRadius: "4px",
-        }}
-      >
-        {isUser ? (
-          <p className="whitespace-pre-wrap leading-relaxed font-medium">{msg.content}</p>
-        ) : (
-          <div className="prose prose-sm dark:prose-invert max-w-none leading-relaxed">
-            {msg.content ? (
-              <ReactMarkdown
-                components={{
-                  code({ className, children, ...props }: any) {
-                    const isBlock = className?.includes("language-");
-                    return isBlock ? (
-                      <pre
-                        className="overflow-x-auto my-2 rounded-xl p-3 text-xs"
-                        style={{ background: "hsl(222 47% 3%)", border: "1px solid hsl(220 25% 12%)" }}
-                      >
-                        <code className={`${className}`} {...props}>{children}</code>
-                      </pre>
-                    ) : (
-                      <code
-                        className="px-1.5 py-0.5 rounded text-xs font-mono"
-                        style={{ background: "hsl(222 47% 3%)", color: "hsl(210 100% 70%)" }}
-                        {...props}
-                      >
-                        {children}
-                      </code>
-                    );
-                  },
-                }}
-              >
-                {msg.content}
-              </ReactMarkdown>
-            ) : null}
-            {isStreaming && (
-              <span className="inline-flex gap-1 ml-1 align-middle">
-                {[0, 150, 300].map((delay) => (
-                  <span
-                    key={delay}
-                    className="w-1.5 h-1.5 rounded-full inline-block"
-                    style={{
-                      background: "hsl(210 100% 56%)",
-                      animation: `typing-dot 1.2s ease-in-out ${delay}ms infinite`,
-                    }}
-                  />
-                ))}
-              </span>
-            )}
+      {/* Bolha */}
+      <div className="max-w-[78%] flex flex-col gap-1">
+        <div
+          className="rounded-2xl px-4 py-2.5 text-sm"
+          style={isUser ? {
+            background: "hsl(210 100% 50%)",
+            color: "#fff",
+            borderTopRightRadius: "4px",
+          } : {
+            background: "hsl(222 40% 9%)",
+            border: "1px solid hsl(220 25% 14%)",
+            borderTopLeftRadius: "4px",
+          }}
+        >
+          {isUser ? (
+            <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+          ) : (
+            <div className="prose prose-sm dark:prose-invert max-w-none leading-relaxed">
+              {msg.content ? (
+                <ReactMarkdown
+                  components={{
+                    code({ className, children, ...props }: any) {
+                      const isBlock = className?.includes("language-");
+                      return isBlock ? (
+                        <pre className="overflow-x-auto my-2 rounded-xl p-3 text-xs"
+                          style={{ background: "hsl(222 47% 3%)", border: "1px solid hsl(220 25% 12%)" }}>
+                          <code className={className} {...props}>{children}</code>
+                        </pre>
+                      ) : (
+                        <code className="px-1.5 py-0.5 rounded text-xs font-mono"
+                          style={{ background: "hsl(222 47% 3%)", color: "hsl(210 100% 70%)" }} {...props}>
+                          {children}
+                        </code>
+                      );
+                    },
+                  }}
+                >
+                  {msg.content}
+                </ReactMarkdown>
+              ) : null}
+              {isStreaming && (
+                <span className="inline-flex gap-1 ml-1 align-middle">
+                  {[0, 150, 300].map((d) => (
+                    <span key={d} className="w-1.5 h-1.5 rounded-full inline-block"
+                      style={{ background: "hsl(210 100% 56%)", animation: `typing-dot 1.2s ease-in-out ${d}ms infinite` }} />
+                  ))}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+        {hora && (
+          <div className={`text-[10px] text-muted-foreground/40 flex items-center gap-1 ${isUser ? "justify-end" : "justify-start"}`}>
+            {hora}
+            {isUser && <span className="opacity-60">✓✓</span>}
           </div>
         )}
       </div>

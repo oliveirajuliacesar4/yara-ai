@@ -1,0 +1,140 @@
+Crie uma aplicação web completa chamada YARA (IA Assistente) com base na imagem fornecida.
+
+🧠 INTERPRETAÇÃO DA IMAGEM
+
+- Analise a imagem enviada como referência principal
+- Reproduza fielmente:
+  - Layout geral
+  - Estrutura do chat
+  - Sidebar lateral
+  - Botões e ícones
+  - Estilo visual (cores, espaçamento, formas)
+- NÃO copie apenas o visual: interprete também as funcionalidades implícitas
+
+---
+
+🎯 OBJETIVO
+
+Criar um sistema de chat com IA totalmente funcional, inspirado na interface da imagem, semelhante ao ChatGPT, porém com identidade própria YARA.
+
+---
+
+🎨 DESIGN
+
+- Tema escuro (dark mode)
+- Cores: azul neon, ciano, branco
+- Estilo: futurista, clean, minimalista
+- Interface moderna e responsiva
+
+---
+
+🧠 USO DA IMAGEM (OBRIGATÓRIO)
+
+- Usar a imagem da mulher IA como identidade visual principal
+- Aplicar:
+  - Na sidebar
+  - Ou na tela inicial do chat
+- Ajustar automaticamente proporção e tamanho
+- Manter qualidade e centralização
+
+---
+
+🧱 ESTRUTURA (BASEADA NA IMAGEM)
+
+Sidebar (lado esquerdo)
+
+Implementar exatamente como na imagem:
+
+- Logo + nome YARA
+- Botão: Nova conversa
+- Lista de conversas
+- Botão: Novo Projeto
+- Seção Memória
+- Informações do usuário
+- Botão Sair
+
+---
+
+Chat principal
+
+Baseado na imagem:
+
+- Mensagens do usuário (direita)
+- Mensagens da IA (esquerda)
+- Bolhas estilizadas
+- Animação de "digitando..." (3 pontos)
+- Input fixo na parte inferior
+- Botão enviar (ícone)
+
+---
+
+Menu hambúrguer (☰)
+
+IMPORTANTE:
+
+- Deve ser totalmente funcional
+- Ao clicar, abrir menu com:
+  - Configurações
+  - Tema (dark/light)
+  - Limpar chat
+  - Exportar conversa
+  - Sobre
+
+---
+
+⚙️ FUNCIONALIDADES (TODAS DEVEM FUNCIONAR)
+
+Baseado na interface da imagem:
+
+1. Chat com IA funcionando (API integrada)
+2. Histórico de conversas
+3. Criar nova conversa
+4. Animação de resposta da IA
+5. Scroll automático
+6. Sidebar funcional e colapsável
+7. Menu hambúrguer funcional
+8. Sistema de projetos (básico)
+9. Sistema de memória (simulado ou real)
+10. Responsividade total
+11. Feedback visual ao usuário
+
+---
+
+🛠️ TECNOLOGIAS
+
+Frontend:
+
+- React ou Next.js
+- TailwindCSS
+
+Backend:
+
+- Node.js + Express
+
+Integração:
+
+- OpenAI API ou Google Gemini
+
+---
+
+📱 RESPONSIVIDADE
+
+- Mobile, tablet e desktop
+- Sidebar vira menu no mobile
+- Layout adaptável
+
+---
+
+🚀 FOCO
+
+- Interface profissional
+- UX semelhante ao ChatGPT
+- Código limpo e modular
+
+---
+
+📌 INSTRUÇÃO FINAL
+
+Use a imagem fornecida como referência visual e estrutural, interpretando tanto o design quanto as funcionalidades implícitas nela.
+
+Gere um projeto completo pronto para rodar.
