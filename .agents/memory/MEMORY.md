@@ -1,0 +1,1 @@
+- [Gemini como motor IA](gemini-motor.md) — YARA usa Google Gemini (NUNCA OpenAI); chave: GEMINI_API_KEY; modelo: gemini-1.5-flash

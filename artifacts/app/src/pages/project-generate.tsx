@@ -61,7 +61,6 @@ export default function GerarProjeto() {
     query: { enabled: !!projetoId, queryKey: getGetProjectQueryKey(projetoId) },
   });
 
-  // Verificar status dos serviços
   useEffect(() => {
     fetch("/api/status", { credentials: "include" })
       .then(r => r.json())
@@ -162,7 +161,7 @@ export default function GerarProjeto() {
   };
 
   const etapaAtual = parseEtapaAtual(logs);
-  const openaiAusente = status !== null && !status.openai;
+  const openaiAusente = status !== null && !(status as any).gemini;
 
   return (
     <div className="max-w-5xl mx-auto space-y-5">
@@ -185,32 +184,32 @@ export default function GerarProjeto() {
         </p>
       </div>
 
-      {/* Aviso de OPENAI_API_KEY ausente */}
+      {/* Aviso de GEMINI_API_KEY ausente */}
       {openaiAusente && (
         <div className="flex items-start gap-3 p-4 rounded-lg border border-yellow-500/40 bg-yellow-500/5">
           <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
           <div className="space-y-2 flex-1">
             <p className="text-sm font-semibold text-yellow-400">
-              Chave da OpenAI não configurada
+              Chave do Google Gemini não configurada
             </p>
             <p className="text-sm text-muted-foreground">
-              Para usar a YARA, você precisa adicionar sua chave da OpenAI. Siga os passos abaixo:
+              A YARA usa o <strong className="text-foreground">Google Gemini</strong> para gerar sistemas. Siga os passos:
             </p>
             <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-              <li>Acesse <strong className="text-foreground">platform.openai.com/api-keys</strong> e crie uma chave</li>
-              <li>No Replit, clique no ícone de <strong className="text-foreground">cadeado (Secrets)</strong> no painel esquerdo</li>
-              <li>Adicione um secret com o nome <code className="bg-secondary px-1.5 py-0.5 rounded text-xs font-mono text-primary">OPENAI_API_KEY</code></li>
+              <li>Acesse <strong className="text-foreground">aistudio.google.com/app/apikey</strong> e crie uma chave gratuita</li>
+              <li>No Replit, clique no ícone de <strong className="text-foreground">cadeado 🔒 (Secrets)</strong> no painel esquerdo</li>
+              <li>Adicione um secret com o nome <code className="bg-secondary px-1.5 py-0.5 rounded text-xs font-mono text-primary">GEMINI_API_KEY</code></li>
               <li>Cole sua chave como valor e salve</li>
-              <li>Reinicie o servidor (Workflows → API Server → Restart)</li>
+              <li>Vá em <strong className="text-foreground">Workflows → API Server → Restart</strong></li>
             </ol>
             <a
-              href="https://platform.openai.com/api-keys"
+              href="https://aistudio.google.com/app/apikey"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline mt-1"
             >
               <Key className="w-3 h-3" />
-              Ir para OpenAI API Keys
+              Obter chave gratuita no Google AI Studio
               <ExternalLink className="w-3 h-3" />
             </a>
           </div>

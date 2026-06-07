@@ -1,0 +1,215 @@
+Crie uma plataforma completa de Inteligência Artificial chamada **YARA**, com nome de aplicativo exibido como **"GPT Yara"** no dispositivo móvel (Android/iOS), funcionando como uma IA avançada, geradora de sistemas, com interface estilo ChatGPT, memória inteligente, aprendizado contínuo e capacidade de integração com outras IAs.
+
+# ⚠️ IMPORTANTE (ALTERAÇÃO DE API)
+
+A IA deve utilizar exclusivamente a API do **Google Gemini (Google AI)** para geração de respostas.
+
+NÃO utilizar OpenAI.
+NÃO solicitar OPENAI_API_KEY.
+NÃO depender de serviços da OpenAI.
+
+Utilizar variável de ambiente:
+
+GEMINI_API_KEY
+
+Modelo padrão:
+gemini-1.5-flash (ou versão mais recente disponível)
+
+---
+
+# 📱 IDENTIDADE DO APP
+
+- Nome do app: **GPT Yara**
+- Nome interno do sistema: YARA
+- Aplicativo instalável no celular (APK real)
+
+---
+
+# 🎨 INTERFACE (ESTILO CHATGPT)
+
+Layout:
+- Sidebar lateral (conversas)
+- Área principal de chat
+- Input fixo inferior
+
+Funcionalidades:
+- Histórico de conversas
+- Nova conversa
+- Respostas em tempo real (streaming)
+- Suporte a texto, código, imagens e arquivos
+
+Design:
+- Dark mode
+- UI moderna e fluida
+- Responsivo
+
+---
+
+# 🧠 FUNÇÃO PRINCIPAL
+
+- IA conversacional nível ChatGPT
+- Geradora de sistemas
+- Assistente inteligente
+
+---
+
+# 💻 GERAÇÃO DE SISTEMAS
+
+- Frontend: React
+- Backend: Node.js + Express
+- API REST
+- CRUD completo
+- JWT Auth
+- Banco estruturado
+
+---
+
+# 📱 GERAÇÃO DE APK
+
+- React Native ou Flutter
+- Build configurado
+- APK real para download
+
+---
+
+# 🖼️ IMAGENS
+
+- Gerar imagens por prompt
+- UI/UX
+- Logos
+
+---
+
+# 📄 DOCUMENTOS
+
+- PDF
+- DOCX
+- TXT
+- JSON
+- CSV
+
+---
+
+# 🧠 MEMÓRIA
+
+- Memória por usuário
+- Ranking de relevância
+- Esquecimento inteligente
+
+---
+
+# 🔍 EMBEDDINGS
+
+- Busca semântica
+- Vetores
+- Contexto melhorado
+
+---
+
+# 🧠 APRENDIZADO
+
+- Aprender com usuário
+- Melhorar respostas
+- Adaptar comportamento
+
+---
+
+# 🔁 AUTO-CORREÇÃO
+
+- Detectar erros
+- Corrigir automaticamente
+- Reexecutar
+
+---
+
+# 🌐 AI_COMMUNICATION
+
+Integrações:
+
+- Google Gemini (PRINCIPAL)
+- OpenAI (OPCIONAL - apenas fallback se ativado manualmente)
+- Replit AI
+
+Funções:
+- Validar respostas
+- Comparar resultados
+- Aprender externamente
+
+---
+
+# 🔐 SEGURANÇA
+
+- JWT
+- bcrypt
+- HTTPS
+- Rate limit
+- Anti SQL Injection / XSS / CSRF
+- Monitoramento
+
+---
+
+# ⚡ PERFORMANCE
+
+- Cache
+- Async
+- Fila de tarefas
+
+---
+
+# 💸 OTIMIZAÇÃO
+
+- Redução de chamadas API
+- Uso de cache
+- Controle de consumo
+
+---
+
+# 🌐 INFRA
+
+- Node.js
+- PostgreSQL
+- VPS
+- PM2
+- Nginx
+
+---
+
+# 🔄 PIPELINE
+
+1. Input usuário
+2. Memória
+3. Contexto
+4. Decisão
+5. Geração (GEMINI)
+6. Revisão
+7. Validação
+8. Aprendizado
+
+---
+
+# ⚠️ TRATAMENTO DE ERROS
+
+- Detectar falhas
+- Corrigir automaticamente
+- Log
+- Retry
+- Nunca travar
+
+---
+
+# 🚀 RESULTADO
+
+- ChatGPT próprio
+- Gerador de sistemas
+- APK real
+- IA evolutiva
+- Produção pronta
+
+---
+
+# ⚠️ REGRAS
+
+- Nunca gerar código incompleto
+- Sempre validar
+- Nunca usar OpenAI como padrão
+- Sempre priorizar Gemini
