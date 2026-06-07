@@ -1,0 +1,192 @@
+Crie uma aplicação web completa chamada YARA (Assistente de IA) com nível profissional, baseada na interface fornecida e evoluindo para um sistema real de uso contínuo.
+
+---
+
+🎯 OBJETIVO
+
+Construir um sistema de chat com IA semelhante ao ChatGPT, com:
+
+- Interface moderna e futurista
+- Funcionalidades reais (não apenas visual)
+- Estrutura pronta para produção
+
+---
+
+🎨 DESIGN (MELHORADO)
+
+Baseado na imagem fornecida:
+
+- Tema dark (preto/azul escuro)
+- Azul neon e ciano como cores principais
+- Interface limpa, futurista e responsiva
+
+Melhorias obrigatórias:
+
+- Animações suaves (hover, clique, transições)
+- Efeito glow nos botões principais
+- Avatar da YARA com leve destaque (glow ou animação)
+- Tela inicial com mensagem:
+  "Como posso te ajudar hoje?"
+
+---
+
+🧠 IDENTIDADE VISUAL
+
+- Usar a imagem da mulher IA como identidade principal
+- Nome do sistema: YARA
+- Aplicar a imagem:
+  - Sidebar
+  - Tela inicial
+- Ajustar tamanho automaticamente
+
+---
+
+🧱 ESTRUTURA
+
+📌 Sidebar (melhorada)
+
+- Logo + YARA
+- Botão: Nova conversa
+- Lista de chats
+- Botão: Novo Projeto
+- Seção: Memória
+- Perfil do usuário (email)
+- Botão: Sair
+
+Extras:
+
+- Sidebar colapsável
+- Animação ao abrir/fechar
+
+---
+
+💬 CHAT (MELHORADO)
+
+- Mensagens direita (usuário)
+- Mensagens esquerda (IA)
+- Bolhas modernas
+- Indicador de digitação (3 pontos animados)
+- Input fixo inferior
+- Botão enviar
+
+Diferencial:
+
+- Resposta em streaming (digitando aos poucos)
+
+---
+
+☰ MENU HAMBÚRGUER (FUNCIONAL)
+
+Criar menu com:
+
+- Configurações
+- Alternar tema
+- Limpar conversa
+- Exportar chat
+- Sobre a YARA
+
+---
+
+⚙️ FUNCIONALIDADES AVANÇADAS
+
+🧠 1. Sistema de usuários
+
+- Login e cadastro
+- Sessão do usuário
+- Histórico individual
+
+---
+
+💬 2. Chat com IA real
+
+- Integração com OpenAI ou Gemini
+- Envio e resposta funcionando
+- Streaming de resposta
+
+---
+
+🧠 3. Memória REAL
+
+- Salvar informações do usuário
+- Exemplo: nome, preferências
+- Persistência no banco
+
+---
+
+📂 4. Sistema de projetos
+
+- Criar projetos
+- Cada projeto com seus chats
+
+---
+
+💾 5. Histórico
+
+- Salvar conversas no banco
+- Carregar automaticamente
+
+---
+
+📊 6. Painel de controle
+
+- Configurar API key
+- Limpar dados
+- Ver uso
+
+---
+
+⚡ 7. UX PROFISSIONAL
+
+- Scroll automático
+- Feedback visual
+- Loading da IA
+- Interface fluida
+
+---
+
+🛠️ TECNOLOGIAS
+
+Frontend:
+
+- React ou Next.js
+- TailwindCSS
+
+Backend:
+
+- Node.js + Express
+
+Banco de dados:
+
+- SQLite (simples) ou MongoDB
+
+---
+
+🔐 SEGURANÇA
+
+- Variáveis de ambiente (.env)
+- Proteção básica de rotas
+- API key protegida
+
+---
+
+📱 RESPONSIVIDADE
+
+- Mobile
+- Tablet
+- Desktop
+
+---
+
+🚀 DIFERENCIAL
+
+- Sistema pronto para sair do Replit
+- Estrutura organizada (frontend + backend separados)
+- Código modular
+
+---
+
+📌 INSTRUÇÃO FINAL
+
+Use a imagem fornecida como base visual e implemente TODAS as funcionalidades descritas acima.
+
+O sistema deve estar pronto para rodar fora do Replit em um servidor próprio.
