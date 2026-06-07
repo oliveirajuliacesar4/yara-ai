@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Code2, Brain, ShieldCheck, Github } from "lucide-react";
+import { Brain, MessageSquare, FolderOpen, Zap } from "lucide-react";
+import { yaraLogo, yaraAvatar } from "@/lib/images";
 
 const esquemaLogin = z.object({
   email: z.string().email("E-mail inválido"),
@@ -26,9 +27,7 @@ export default function PaginaInicial() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    if (user) {
-      setLocation("/painel");
-    }
+    if (user) setLocation("/chat");
   }, [user, setLocation]);
 
   const formLogin = useForm<z.infer<typeof esquemaLogin>>({
@@ -50,143 +49,243 @@ export default function PaginaInicial() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row items-center justify-center p-4 gap-12">
-      <div className="flex-1 max-w-lg space-y-6">
-        {/* Logo YARA */}
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ background: "hsl(222 47% 2%)" }}
+    >
+      {/* ── TOP BAR ── */}
+      <header className="flex items-center justify-between px-6 py-4 border-b" style={{ borderBottomColor: "hsl(210 100% 56% / 0.12)" }}>
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 avatar-glow">
-            <img src="/images/logo-yara.png" alt="YARA Logo" className="w-full h-full object-cover" />
+          <div className="w-10 h-10 rounded-xl overflow-hidden avatar-glow">
+            <img src={yaraLogo} alt="YARA" className="w-full h-full object-cover" />
           </div>
           <div>
-            <span className="font-bold text-2xl tracking-wide yara-gradient-text">GPT YARA</span>
-            <div className="text-[11px] text-muted-foreground font-mono tracking-widest">SUA INTELIGÊNCIA. SEM LIMITES.</div>
+            <div className="font-bold text-lg tracking-wide yara-gradient-text">GPT YARA</div>
+            <div className="text-[9px] font-mono tracking-widest text-muted-foreground/50">SUA INTELIGÊNCIA. SEM LIMITES.</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-green-400 yara-pulse" />
+          <span className="text-xs text-muted-foreground hidden sm:block">Sistema Online</span>
+        </div>
+      </header>
+
+      {/* ── CORPO PRINCIPAL ── */}
+      <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-10 px-4 py-10 max-w-7xl mx-auto w-full">
+
+        {/* ── LADO ESQUERDO — Avatar + Info ── */}
+        <div className="flex flex-col items-center lg:items-start gap-6 flex-1 max-w-xl">
+
+          {/* Avatar YARA grande */}
+          <div className="relative flex flex-col items-center lg:flex-row lg:items-end gap-6">
+            <div className="relative">
+              {/* Glow de fundo */}
+              <div
+                className="absolute inset-0 rounded-full blur-3xl opacity-30"
+                style={{ background: "hsl(210 100% 56%)", transform: "scale(1.3)" }}
+              />
+              <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full overflow-hidden avatar-glow-animate">
+                <img
+                  src={yaraAvatar}
+                  alt="YARA — Inteligência Artificial"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              {/* Badge online */}
+              <div
+                className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                style={{ background: "hsl(222 40% 8%)", border: "1px solid hsl(210 100% 56% / 0.3)", color: "hsl(210 100% 70%)" }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 yara-pulse" />
+                Online
+              </div>
+            </div>
+
+            <div className="text-center lg:text-left">
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-none mb-2">
+                <span className="yara-gradient-text">YARA</span>
+              </h1>
+              <p className="text-base text-muted-foreground leading-relaxed max-w-xs">
+                Sua assistente de IA com memória, gerador de sistemas e chat inteligente.
+              </p>
+            </div>
+          </div>
+
+          {/* Features */}
+          <div className="grid grid-cols-2 gap-3 w-full">
+            {[
+              { icone: MessageSquare, titulo: "Chat com IA",      desc: "Converse com a YARA em tempo real com respostas em streaming" },
+              { icone: Brain,         titulo: "Memória Real",     desc: "A YARA lembra de você e aprende com cada conversa" },
+              { icone: FolderOpen,    titulo: "Seus Projetos",    desc: "Gerencie e gere sistemas completos com IA" },
+              { icone: Zap,           titulo: "Sem Limites",      desc: "Código, análises, resumos e muito mais em segundos" },
+            ].map(({ icone: Icon, titulo, desc }) => (
+              <div
+                key={titulo}
+                className="p-4 rounded-2xl border transition-all group"
+                style={{ background: "hsl(222 40% 5%)", borderColor: "hsl(220 25% 12%)" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsl(210 100% 56% / 0.3)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsl(220 25% 12%)"; }}
+              >
+                <Icon className="w-5 h-5 mb-2" style={{ color: "hsl(210 100% 60%)" }} />
+                <h3 className="font-semibold text-sm mb-1">{titulo}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+              </div>
+            ))}
           </div>
         </div>
 
-        <h1 className="text-4xl md:text-5xl font-sans font-bold tracking-tight text-foreground leading-tight">
-          Sua engenheira de software<br />
-          <span className="yara-gradient-text">movida a IA</span>
-        </h1>
-        <p className="text-base text-muted-foreground leading-relaxed">
-          Descreva o sistema que precisa. A YARA gera backend, frontend, banco de dados, testes e documentação — tudo pronto para produção.
-        </p>
+        {/* ── LADO DIREITO — Formulário ── */}
+        <div className="w-full max-w-md">
+          <div
+            className="rounded-2xl overflow-hidden shadow-2xl"
+            style={{ background: "hsl(222 40% 6%)", border: "1px solid hsl(210 100% 56% / 0.15)" }}
+          >
+            {/* Header do card */}
+            <div
+              className="flex flex-col items-center py-6 px-6 border-b"
+              style={{ borderBottomColor: "hsl(210 100% 56% / 0.1)", background: "hsl(222 40% 5%)" }}
+            >
+              <div className="w-16 h-16 rounded-full overflow-hidden avatar-glow mb-3">
+                <img src={yaraAvatar} alt="YARA" className="w-full h-full object-cover" />
+              </div>
+              <div className="text-lg font-bold yara-gradient-text">Bem-vindo ao GPT YARA</div>
+              <div className="text-xs text-muted-foreground mt-0.5">Entre ou crie sua conta para começar</div>
+            </div>
 
-        <div className="grid grid-cols-2 gap-3 pt-2">
-          <div className="p-4 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors">
-            <Code2 className="w-5 h-5 text-primary mb-2" />
-            <h3 className="font-semibold text-sm mb-1">7 Etapas de Validação</h3>
-            <p className="text-xs text-muted-foreground">Código revisado e validado automaticamente antes de entrar em produção.</p>
-          </div>
-          <div className="p-4 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors">
-            <Brain className="w-5 h-5 text-primary mb-2" />
-            <h3 className="font-semibold text-sm mb-1">Memória Persistente</h3>
-            <p className="text-xs text-muted-foreground">A YARA aprende com cada projeto e melhora continuamente.</p>
-          </div>
-          <div className="p-4 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors">
-            <ShieldCheck className="w-5 h-5 text-primary mb-2" />
-            <h3 className="font-semibold text-sm mb-1">Código Seguro</h3>
-            <p className="text-xs text-muted-foreground">Validação de segurança, autenticação JWT e boas práticas.</p>
-          </div>
-          <div className="p-4 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors">
-            <Github className="w-5 h-5 text-primary mb-2" />
-            <h3 className="font-semibold text-sm mb-1">Publicação GitHub</h3>
-            <p className="text-xs text-muted-foreground">Cria o repositório e faz push de todos os arquivos automaticamente.</p>
+            <div className="p-6">
+              <Tabs defaultValue="login" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-5" style={{ background: "hsl(222 40% 8%)" }}>
+                  <TabsTrigger value="login" data-testid="tab-login">Entrar</TabsTrigger>
+                  <TabsTrigger value="register" data-testid="tab-register">Cadastrar</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="login">
+                  <Form {...formLogin}>
+                    <form onSubmit={formLogin.handleSubmit(aoEntrar)} className="space-y-4">
+                      <FormField
+                        control={formLogin.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm text-muted-foreground">E-mail</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="email"
+                                placeholder="seu@email.com"
+                                {...field}
+                                data-testid="input-login-email"
+                                style={{ background: "hsl(222 40% 8%)", borderColor: "hsl(220 25% 16%)" }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={formLogin.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm text-muted-foreground">Senha</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="password"
+                                placeholder="••••••"
+                                {...field}
+                                data-testid="input-login-senha"
+                                style={{ background: "hsl(222 40% 8%)", borderColor: "hsl(220 25% 16%)" }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        type="submit"
+                        className="w-full font-semibold btn-neon"
+                        data-testid="button-entrar"
+                        style={{ background: "hsl(210 100% 56%)", color: "hsl(222 47% 2%)", border: "none" }}
+                      >
+                        Acessar Plataforma
+                      </Button>
+                    </form>
+                  </Form>
+                </TabsContent>
+
+                <TabsContent value="register">
+                  <Form {...formCadastro}>
+                    <form onSubmit={formCadastro.handleSubmit(aoCadastrar)} className="space-y-4">
+                      <FormField
+                        control={formCadastro.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm text-muted-foreground">Nome completo</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="João Silva"
+                                {...field}
+                                data-testid="input-cadastro-nome"
+                                style={{ background: "hsl(222 40% 8%)", borderColor: "hsl(220 25% 16%)" }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={formCadastro.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm text-muted-foreground">E-mail</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="email"
+                                placeholder="seu@email.com"
+                                {...field}
+                                data-testid="input-cadastro-email"
+                                style={{ background: "hsl(222 40% 8%)", borderColor: "hsl(220 25% 16%)" }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={formCadastro.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm text-muted-foreground">Senha</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="password"
+                                placeholder="••••••"
+                                {...field}
+                                data-testid="input-cadastro-senha"
+                                style={{ background: "hsl(222 40% 8%)", borderColor: "hsl(220 25% 16%)" }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        type="submit"
+                        className="w-full font-semibold btn-neon"
+                        data-testid="button-cadastrar"
+                        style={{ background: "hsl(210 100% 56%)", color: "hsl(222 47% 2%)", border: "none" }}
+                      >
+                        Criar Conta Grátis
+                      </Button>
+                    </form>
+                  </Form>
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div className="w-full max-w-md bg-card border border-border rounded-xl p-6 shadow-2xl">
-        <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="login" data-testid="tab-login">Entrar</TabsTrigger>
-            <TabsTrigger value="register" data-testid="tab-register">Cadastrar</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="login">
-            <Form {...formLogin}>
-              <form onSubmit={formLogin.handleSubmit(aoEntrar)} className="space-y-4">
-                <FormField
-                  control={formLogin.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>E-mail</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="seu@email.com" {...field} data-testid="input-login-email" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={formLogin.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Senha</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="••••••" {...field} data-testid="input-login-senha" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full" data-testid="button-entrar">
-                  Acessar Plataforma
-                </Button>
-              </form>
-            </Form>
-          </TabsContent>
-
-          <TabsContent value="register">
-            <Form {...formCadastro}>
-              <form onSubmit={formCadastro.handleSubmit(aoCadastrar)} className="space-y-4">
-                <FormField
-                  control={formCadastro.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome completo</FormLabel>
-                      <FormControl>
-                        <Input placeholder="João Silva" {...field} data-testid="input-cadastro-nome" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={formCadastro.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>E-mail</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="seu@email.com" {...field} data-testid="input-cadastro-email" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={formCadastro.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Senha</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="••••••" {...field} data-testid="input-cadastro-senha" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full" data-testid="button-cadastrar">
-                  Criar Conta
-                </Button>
-              </form>
-            </Form>
-          </TabsContent>
-        </Tabs>
       </div>
     </div>
   );

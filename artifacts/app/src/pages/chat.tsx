@@ -13,6 +13,7 @@ import {
   Download, Info, Trash, ChevronLeft
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { yaraAvatar, yaraLogo } from "@/lib/images";
 
 /* ── Tipos ── */
 type Conversation = { id: number; title: string; createdAt: string; updatedAt: string };
@@ -264,7 +265,7 @@ export default function Chat() {
       <div className={`flex flex-col items-center py-4 px-3 border-b transition-all duration-300 ${sidebarAberta ? "px-4" : "px-2"}`}
         style={{ borderBottomColor: "hsl(210 100% 56% / 0.1)" }}>
         <div className={`rounded-full overflow-hidden avatar-glow-animate transition-all duration-300 ${sidebarAberta ? "w-20 h-20 mb-3" : "w-10 h-10 mb-1"}`}>
-          <img src="/images/yara-avatar.png" alt="YARA" className="w-full h-full object-cover" />
+          <img src={yaraAvatar} alt="YARA" className="w-full h-full object-cover" />
         </div>
         {sidebarAberta && (
           <div className="text-center fade-in">
@@ -534,7 +535,7 @@ export default function Chat() {
 
         <div className="flex flex-col items-center p-6 text-center">
           <div className="w-20 h-20 rounded-full overflow-hidden avatar-glow-animate mb-4">
-            <img src="/images/yara-avatar.png" alt="YARA" className="w-full h-full object-cover" />
+            <img src={yaraAvatar} alt="YARA" className="w-full h-full object-cover" />
           </div>
           <div className="text-2xl font-bold yara-gradient-text mb-1">GPT YARA</div>
           <div className="text-xs font-mono text-muted-foreground/60 tracking-widest mb-4">SUA INTELIGÊNCIA. SEM LIMITES.</div>
@@ -657,7 +658,7 @@ export default function Chat() {
             /* ── Tela inicial ── */
             <div className="h-full flex flex-col items-center justify-center gap-5 p-6 text-center fade-in">
               <div className="w-24 h-24 rounded-full overflow-hidden avatar-glow-animate">
-                <img src="/images/yara-avatar.png" alt="YARA" className="w-full h-full object-cover" />
+                <img src={yaraAvatar} alt="YARA" className="w-full h-full object-cover" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold mb-1">
@@ -775,7 +776,7 @@ function BolhaChat({ msg }: { msg: ChatMessage | StreamingMessage }) {
         </div>
       ) : (
         <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 mt-0.5 avatar-glow">
-          <img src="/images/yara-avatar.png" alt="YARA" className="w-full h-full object-cover" />
+          <img src={yaraAvatar} alt="YARA" className="w-full h-full object-cover" />
         </div>
       )}
 

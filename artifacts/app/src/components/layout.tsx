@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { LogOut, Home, Plus, Brain, MessageSquare, X, Menu, Settings } from "lucide-react";
+import { yaraLogo } from "@/lib/images";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
@@ -30,7 +31,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Link href="/painel">
           <div className="flex items-center gap-3 cursor-pointer">
             <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 avatar-glow">
-              <img src="/images/logo-yara.png" alt="YARA Logo" className="w-full h-full object-cover" />
+              <img src={yaraLogo} alt="YARA Logo" className="w-full h-full object-cover" />
             </div>
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-lg tracking-wide yara-gradient-text">GPT YARA</span>
