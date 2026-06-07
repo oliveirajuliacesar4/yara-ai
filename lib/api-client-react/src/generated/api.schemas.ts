@@ -137,3 +137,41 @@ export interface MemoriaEntry {
   criadoEm: string;
 }
 
+export interface Conversation {
+  id: number;
+  userId: number;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type ChatMessageRole = typeof ChatMessageRole[keyof typeof ChatMessageRole];
+
+
+export const ChatMessageRole = {
+  user: 'user',
+  model: 'model',
+} as const;
+
+export interface ChatMessage {
+  id: number;
+  conversationId: number;
+  role: ChatMessageRole;
+  content: string;
+  createdAt: string;
+}
+
+export type ConversationWithMessages = Conversation & {
+  messages: ChatMessage[];
+};
+
+export interface SendMessageInput {
+  /** @minLength 1 */
+  content: string;
+}
+
+export interface RenameChatInput {
+  /** @minLength 1 */
+  title: string;
+}
+

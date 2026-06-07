@@ -269,3 +269,90 @@ export const ListMemoriaResponseItem = zod.object({
 export const ListMemoriaResponse = zod.array(ListMemoriaResponseItem)
 
 
+/**
+ * @summary Listar conversas do usuário
+ */
+export const ListConversationsResponseItem = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "title": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListConversationsResponse = zod.array(ListConversationsResponseItem)
+
+
+/**
+ * @summary Obter conversa com mensagens
+ */
+export const GetConversationParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetConversationResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "title": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+}).and(zod.object({
+  "messages": zod.array(zod.object({
+  "id": zod.number(),
+  "conversationId": zod.number(),
+  "role": zod.enum(['user', 'model']),
+  "content": zod.string(),
+  "createdAt": zod.string()
+}))
+}))
+
+
+/**
+ * @summary Renomear conversa
+ */
+export const RenameConversationParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+
+
+export const RenameConversationBody = zod.object({
+  "title": zod.string().min(1)
+})
+
+export const RenameConversationResponse = zod.object({
+  "id": zod.number(),
+  "userId": zod.number(),
+  "title": zod.string(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Deletar conversa
+ */
+export const DeleteConversationParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const DeleteConversationResponse = zod.object({
+  "success": zod.boolean()
+})
+
+
+/**
+ * @summary Enviar mensagem (streaming SSE)
+ */
+export const SendChatMessageParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+
+
+export const SendChatMessageBody = zod.object({
+  "content": zod.string().min(1)
+})
+
+

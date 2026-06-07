@@ -19,9 +19,9 @@ Plataforma de IA que gera sistemas de software completos automaticamente. O usu�
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
 - API: Express 5 + express-session (cookie-based auth)
-- DB: PostgreSQL + Drizzle ORM + tables: users, projects, generated_files, memoria, logs_geracao
+- DB: PostgreSQL + Drizzle ORM + tables: users, projects, generated_files, memoria, logs_geracao, conversations, chat_messages
 - Auth: bcryptjs password hashing + session cookies
-- AI: Google Gemini (gemini-1.5-flash) via @google/genai — streaming SSE + validation pipeline
+- AI: Google Gemini (gemini-2.0-flash) via @google/genai — streaming SSE + validation pipeline
 - Validation: Zod (`zod/v4`), `drizzle-zod`
 - API codegen: Orval (from OpenAPI spec)
 - Frontend: React + Vite + Tailwind CSS + shadcn/ui + wouter
@@ -32,9 +32,11 @@ Plataforma de IA que gera sistemas de software completos automaticamente. O usu�
 - `lib/db/src/schema/` — Drizzle table definitions
 - `artifacts/api-server/src/routes/` — Express route handlers
 - `artifacts/api-server/src/lib/yara-motor.ts` — YARA 7-step generation pipeline
+- `artifacts/api-server/src/routes/chat.ts` — Chat conversacional com streaming Gemini
 - `artifacts/app/src/` — React frontend
 - `artifacts/app/src/hooks/use-auth.tsx` — Auth context
 - `artifacts/app/src/pages/` — Page components
+- `artifacts/app/src/pages/chat.tsx` — Chat estilo ChatGPT com sidebar de conversas
 
 ## Architecture decisions
 

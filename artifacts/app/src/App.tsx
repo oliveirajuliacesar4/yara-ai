@@ -14,6 +14,7 @@ import NovoProjeto from "@/pages/project-new";
 import DetalhesProjeto from "@/pages/project-detail";
 import GerarProjeto from "@/pages/project-generate";
 import Memoria from "@/pages/memoria";
+import Chat from "@/pages/chat";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,8 @@ function Roteador() {
         <Route path="/projetos/:id/gerar"><RotaProtegida component={GerarProjeto} /></Route>
         <Route path="/projetos/:id"><RotaProtegida component={DetalhesProjeto} /></Route>
         <Route path="/memoria"><RotaProtegida component={Memoria} /></Route>
+        <Route path="/chat/:id"><RotaProtegida component={Chat} /></Route>
+        <Route path="/chat"><RotaProtegida component={Chat} /></Route>
         <Route component={PaginaNaoEncontrada} />
       </Switch>
     </Layout>

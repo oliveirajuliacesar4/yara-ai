@@ -26,7 +26,7 @@ export type ResultadoGeracao = {
   summary: string;
 };
 
-const MODELO_GEMINI = "gemini-1.5-flash";
+const MODELO_GEMINI = "gemini-2.0-flash";
 
 function getGemini(): GoogleGenAI {
   const apiKey = process.env.GEMINI_API_KEY;

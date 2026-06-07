@@ -7,6 +7,10 @@
  */
 
 export * from './authResponse';
+export * from './chatMessage';
+export * from './chatMessageRole';
+export * from './conversation';
+export * from './conversationWithMessages';
 export * from './errorResponse';
 export * from './generatedFile';
 export * from './generateInput';
@@ -22,5 +26,7 @@ export * from './projectStats';
 export * from './projectStatus';
 export * from './projectUpdate';
 export * from './registerInput';
+export * from './renameChatInput';
+export * from './sendMessageInput';
 export * from './successResponse';
 export * from './user';

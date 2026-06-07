@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { LogOut, Home, Plus, Brain, Cpu } from "lucide-react";
+import { LogOut, Home, Plus, Brain, Cpu, MessageSquare } from "lucide-react";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
@@ -13,6 +13,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const navegacao = [
     { nome: "Painel", href: "/painel", icone: Home },
+    { nome: "Chat YARA", href: "/chat", icone: MessageSquare },
     { nome: "Memória", href: "/memoria", icone: Brain },
   ];
 
@@ -85,8 +86,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Conteúdo principal */}
-      <main className="flex-1 overflow-auto">
-        <div className="max-w-6xl mx-auto p-6 md:p-8">
+      <main className="flex-1 overflow-auto flex flex-col min-h-0">
+        <div className={`flex-1 ${location.startsWith("/chat") ? "flex flex-col min-h-0 h-full" : "max-w-6xl mx-auto p-6 md:p-8 w-full"}`}>
           {children}
         </div>
       </main>
