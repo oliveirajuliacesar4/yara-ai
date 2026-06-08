@@ -1,14 +1,15 @@
 const express = require('express');
-const app = express();
+
+const app = express(); // 👈 ISSO estava faltando
 
 app.use(express.json());
 
-// rota de teste
+// teste
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// rota de cadastro
+// cadastro
 app.post('/register', (req, res) => {
   const { name, email, password } = req.body;
 
@@ -20,6 +21,8 @@ app.post('/register', (req, res) => {
 });
 
 // iniciar servidor
-app.listen(3000, '0.0.0.0', () => {
-  console.log('rodando');
+const port = 3000;
+
+app.listen(port, '0.0.0.0', () => {
+  console.log('rodando na porta ' + port);
 });
