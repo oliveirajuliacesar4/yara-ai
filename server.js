@@ -1,36 +1,25 @@
-require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
-
 const app = express();
 
-app.use(cors());
 app.use(express.json());
 
-// Healthcheck (ESSENCIAL PARA DEPLOY)
+// rota de teste
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
+  res.json({ status: 'ok' });
 });
 
-// Rota base
-app.get('/', (req, res) => {
-  res.send('YARA AI backend funcionando 🚀');
-});
+// rota de cadastro
+app.post('/register', (req, res) => {
+  const { name, email, password } = req.body;
 
-// Exemplo rota IA (placeholder)
-app.post('/ai', async (req, res) => {
-  const { message } = req.body;
-
-  if (!message) {
-    return res.status(400).json({ error: 'Mensagem obrigatória' });
+  if (!name || !email || !password) {
+    return res.json({ erro: 'faltando dados' });
   }
 
-  // Aqui você conecta sua IA depois
-  return res.json({ reply: `YARA respondeu: ${message}` });
+  return res.json({ ok: true });
 });
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+// iniciar servidor
+app.listen(3000, '0.0.0.0', () => {
+  console.log('rodando');
 });
