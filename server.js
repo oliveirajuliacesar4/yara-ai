@@ -1,23 +1,12 @@
 const express = require('express');
 
-const app = express(); // 👈 ISSO estava faltando
+const app = express(); // 👈 ESSA LINHA RESOLVE SEU ERRO
 
 app.use(express.json());
 
 // teste
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
-});
-
-// cadastro
-app.post('/register', (req, res) => {
-  const { name, email, password } = req.body;
-
-  if (!name || !email || !password) {
-    return res.json({ erro: 'faltando dados' });
-  }
-
-  return res.json({ ok: true });
 });
 
 // iniciar servidor
