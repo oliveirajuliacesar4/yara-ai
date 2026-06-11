@@ -39,6 +39,10 @@ app.use(
   }),
 );
 
+app.get("/", (_req, res) => {
+  res.type("text/plain").send("YARA server running");
+});
+
 app.use("/api", router);
 
 export default app;
