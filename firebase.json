@@ -1,0 +1,28 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      ".firebaserc.example",
+      "**/.*",
+      "**/node_modules/**",
+      "firebase/**",
+      "flutterflow/**",
+      "guia_app_gastos_flutterflow.md",
+      "README_web.md",
+      "PUBLICAR.md"
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|css)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=3600"
+          }
+        ]
+      }
+    ]
+  }
+}

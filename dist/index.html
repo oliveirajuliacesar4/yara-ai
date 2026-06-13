@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Atlas One: sistema operacional pessoal com IA, memoria, saude, rotina, financas, agenda, metas e produtividade."
+    />
+    <title>Atlas One</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="toast" class="toast hidden" role="status"></div>
+
+    <div id="authScreen" class="auth-screen">
+      <section class="auth-shell">
+        <div class="auth-visual" aria-hidden="true">
+          <div class="brand-mark brand-mark-large"><i data-lucide="orbit"></i></div>
+          <div>
+            <p class="eyebrow">Atlas One</p>
+            <h1>Uma vida organizada começa aqui.</h1>
+            <p class="auth-copy">
+              Uma central inteligente para rotina, saúde, dinheiro, metas, agenda, produtividade
+              e tudo que importa no seu dia.
+            </p>
+          </div>
+          <div class="auth-preview">
+            <div class="preview-line"><span>Índice Atlas</span><strong>86</strong></div>
+            <div class="preview-grid">
+              <div><span>Planos salvos</span><strong>4</strong></div>
+              <div><span>Metas ativas</span><strong>3</strong></div>
+              <div><span>Alertas hoje</span><strong>2</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="auth-panel">
+          <div class="brand-inline">
+            <div class="brand-mark"><i data-lucide="orbit"></i></div>
+            <div>
+              <strong>Atlas One</strong>
+              <span>Seu mundo. Uma plataforma.</span>
+            </div>
+          </div>
+
+          <form id="loginForm" class="auth-form" autocomplete="on">
+            <div>
+              <h2>Entrar</h2>
+              <p>Acesse sua central operacional pessoal.</p>
+            </div>
+            <label>
+              <span>Email</span>
+              <input id="loginEmail" type="email" value="isis@atlas.one" autocomplete="email" />
+            </label>
+            <label>
+              <span>Senha</span>
+              <input id="loginPassword" type="password" value="atlas123" autocomplete="current-password" />
+            </label>
+            <button class="button button-primary" type="submit">
+              <i data-lucide="log-in"></i> Entrar no Atlas One
+            </button>
+            <button id="demoLogin" class="button button-ghost" type="button">
+              <i data-lucide="sparkles"></i> Usar demo de Isis
+            </button>
+            <p id="loginError" class="form-error" role="alert"></p>
+          </form>
+
+          <form id="signupForm" class="auth-form hidden" autocomplete="on">
+            <div>
+              <h2>Criar conta</h2>
+              <p>Comece com uma rotina inteligente em poucos segundos.</p>
+            </div>
+            <label><span>Nome</span><input id="signupName" type="text" autocomplete="name" /></label>
+            <label><span>Email</span><input id="signupEmail" type="email" autocomplete="email" /></label>
+            <label><span>Senha</span><input id="signupPassword" type="password" autocomplete="new-password" /></label>
+            <button class="button button-primary" type="submit">
+              <i data-lucide="user-plus"></i> Criar minha central
+            </button>
+            <p id="signupError" class="form-error" role="alert"></p>
+          </form>
+
+          <div class="auth-switch">
+            <span id="authSwitchText">Ainda não tem conta?</span>
+            <button id="toggleAuth" type="button">Criar conta</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div id="appScreen" class="app-shell hidden">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="brand-mark"><i data-lucide="orbit"></i></div>
+          <div><strong>Atlas One</strong><span>Personal OS</span></div>
+        </div>
+
+        <nav id="sideNav" class="side-nav" aria-label="Navegação principal">
+          <button class="nav-item active" data-section="dashboard"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></button>
+          <button class="nav-item" data-section="assistant"><i data-lucide="bot"></i><span>Atlas AI</span></button>
+          <button class="nav-item" data-section="atlas"><i data-lucide="archive"></i><span>Meu Atlas</span></button>
+          <button class="nav-item" data-section="health"><i data-lucide="heart-pulse"></i><span>Saúde</span></button>
+          <button class="nav-item" data-section="habits"><i data-lucide="repeat-2"></i><span>Hábitos</span></button>
+          <button class="nav-item" data-section="goals"><i data-lucide="target"></i><span>Metas</span></button>
+          <button class="nav-item" data-section="productivity"><i data-lucide="kanban-square"></i><span>Produtividade</span></button>
+          <button class="nav-item" data-section="finance"><i data-lucide="wallet-cards"></i><span>Finanças</span></button>
+          <button class="nav-item" data-section="calendar"><i data-lucide="calendar-days"></i><span>Agenda</span></button>
+          <button class="nav-item" data-section="analytics"><i data-lucide="area-chart"></i><span>Analítico</span></button>
+          <button class="nav-item" data-section="plans"><i data-lucide="gem"></i><span>Planos</span></button>
+          <button class="nav-item" data-section="reports"><i data-lucide="file-text"></i><span>Relatórios</span></button>
+        </nav>
+
+        <div class="side-card">
+          <span>Atlas AI</span>
+          <strong id="sideMemoryCount">0 memórias</strong>
+          <p>Tudo que a IA cria fica salvo na Central Atlas e alimenta o contexto do sistema.</p>
+        </div>
+      </aside>
+
+      <div class="workspace">
+        <header class="topbar">
+          <button id="mobileMenu" class="icon-button mobile-only" type="button" aria-label="Abrir menu">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="topbar-title">
+            <p id="todayLabel">Hoje</p>
+            <h2 id="pageTitle">Dashboard Inteligente</h2>
+          </div>
+          <div class="topbar-actions">
+            <button id="syncButton" class="icon-button" type="button" title="Sincronizar dados">
+              <i data-lucide="refresh-cw"></i>
+            </button>
+            <button id="notificationsButton" class="icon-button" type="button" title="Notificações">
+              <i data-lucide="bell"></i><span class="notification-dot"></span>
+            </button>
+            <button id="accountButton" class="user-pill" type="button">
+              <span id="userInitial">I</span><strong id="userName">Isis</strong><i data-lucide="settings"></i>
+            </button>
+          </div>
+        </header>
+
+        <main class="content">
+          <section id="dashboard" class="app-section active" aria-labelledby="dashboard-title">
+            <div class="hero-panel">
+              <div>
+                <p class="eyebrow">Dashboard Inteligente</p>
+                <h1 id="dashboard-title">Bom dia, Isis.</h1>
+                <p id="daySummary"></p>
+              </div>
+              <div class="hero-actions">
+                <button class="button button-primary quick-command" data-command="Como estou indo este mês?">
+                  <i data-lucide="sparkles"></i> Perguntar ao Atlas
+                </button>
+                <button class="button button-soft quick-command" data-command="Organize minha semana">
+                  <i data-lucide="calendar-check"></i> Organizar semana
+                </button>
+              </div>
+            </div>
+
+            <div class="metric-grid">
+              <article class="metric-card accent-blue"><span><i data-lucide="calendar-check"></i> Compromissos</span><strong id="metricEvents">0</strong><p id="metricEventsText"></p></article>
+              <article class="metric-card accent-orange"><span><i data-lucide="bell-ring"></i> Lembretes</span><strong id="metricReminders">0</strong><p id="metricRemindersText"></p></article>
+              <article class="metric-card accent-green"><span><i data-lucide="wallet"></i> Saldo</span><strong id="metricBalance">R$ 0</strong><p id="metricBalanceText"></p></article>
+              <article class="metric-card accent-purple"><span><i data-lucide="brain-circuit"></i> Memória IA</span><strong id="metricMemories">0</strong><p>Itens salvos no Meu Atlas</p></article>
+            </div>
+
+            <div class="dashboard-grid">
+              <article class="panel day-panel">
+                <div class="panel-header"><div><p class="eyebrow">Hoje</p><h3>Próximos movimentos</h3></div><i data-lucide="route"></i></div>
+                <div id="todayTimeline" class="timeline-list"></div>
+              </article>
+              <article class="panel ai-panel">
+                <div class="panel-header"><div><p class="eyebrow">Insights Atlas AI</p><h3>Contexto do usuário</h3></div><i data-lucide="sparkles"></i></div>
+                <div id="insightList" class="insight-list"></div>
+              </article>
+              <article class="panel"><div class="panel-header"><div><p class="eyebrow">Hábitos</p><h3>Sequências ativas</h3></div><i data-lucide="flame"></i></div><div id="habitSnapshot" class="stack-list"></div></article>
+              <article class="panel"><div class="panel-header"><div><p class="eyebrow">Metas</p><h3>Progresso geral</h3></div><i data-lucide="goal"></i></div><div id="goalSnapshot" class="stack-list"></div></article>
+              <article class="panel"><div class="panel-header"><div><p class="eyebrow">Finanças</p><h3>Categorias do mês</h3></div><i data-lucide="wallet"></i></div><div id="financeBars" class="bar-list"></div></article>
+              <article class="panel"><div class="panel-header"><div><p class="eyebrow">Gamificação</p><h3>Nível 12</h3></div><i data-lucide="badge-check"></i></div><div class="xp-card"><div class="progress-track"><span style="width: 68%"></span></div><p>680 XP de 1000 XP para o nível 13</p></div><div id="achievementList" class="achievement-list"></div></article>
+            </div>
+          </section>
+
+          <section id="assistant" class="app-section" aria-labelledby="assistant-title">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Atlas AI</p>
+                <h1 id="assistant-title">O cérebro do Atlas One</h1>
+                <p>Converse, pergunte, resolva problemas e peça planos. Tudo que a IA cria fica salvo automaticamente.</p>
+              </div>
+              <button id="saveAiEndpoint" class="button button-soft" type="button"><i data-lucide="plug"></i> Salvar endpoint IA</button>
+            </div>
+            <div class="assistant-layout">
+              <article class="panel chat-panel">
+                <div id="chatMessages" class="chat-messages"></div>
+                <form id="aiForm" class="ai-form">
+                  <input id="aiInput" type="text" placeholder="Ex: Como estou indo este mês?" autocomplete="off" />
+                  <button class="icon-button primary" type="submit" aria-label="Enviar"><i data-lucide="send"></i></button>
+                </form>
+              </article>
+              <aside class="assistant-side">
+                <article class="panel">
+                  <div class="panel-header"><div><p class="eyebrow">OpenAI seguro</p><h3>Endpoint do backend</h3></div></div>
+                  <label class="field-control">
+                    <span>URL NestJS/OpenAI</span>
+                    <input id="aiEndpoint" type="url" placeholder="https://seu-backend.com/atlas-ai" />
+                  </label>
+                  <p class="helper-copy">Use um endpoint backend para chamar a OpenAI sem expor chaves no navegador.</p>
+                </article>
+                <article class="panel">
+                  <div class="panel-header"><div><p class="eyebrow">Comandos rápidos</p><h3>Executar agora</h3></div></div>
+                  <div class="chip-grid">
+                    <button class="command-chip quick-command" data-command="Crie uma rotina de academia">Rotina de academia</button>
+                    <button class="command-chip quick-command" data-command="Monte um plano financeiro">Plano financeiro</button>
+                    <button class="command-chip quick-command" data-command="Monte um plano de estudo">Plano de estudo</button>
+                    <button class="command-chip quick-command" data-command="Gere um relatório do meu mês">Relatório mensal</button>
+                  </div>
+                </article>
+                <article class="panel">
+                  <div class="panel-header"><div><p class="eyebrow">Memória recente</p><h3>Criado pela IA</h3></div></div>
+                  <div id="aiCreatedItems" class="stack-list"></div>
+                </article>
+              </aside>
+            </div>
+          </section>
+
+          <section id="atlas" class="app-section" aria-labelledby="atlas-title">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">Central Atlas</p>
+                <h1 id="atlas-title">Tudo que a IA criou</h1>
+                <p>Planos, metas, rotinas, eventos, lembretes e relatórios ficam salvos, editáveis e reutilizáveis.</p>
+              </div>
+              <button id="clearAtlasDone" class="button button-soft" type="button"><i data-lucide="archive-x"></i> Limpar concluídos</button>
+            </div>
+            <div class="atlas-tabs" id="atlasTabs">
+              <button class="active" data-atlas-filter="all">Tudo</button>
+              <button data-atlas-filter="Plano">Planos</button>
+              <button data-atlas-filter="Meta">Metas</button>
+              <button data-atlas-filter="Rotina">Rotinas</button>
+              <button data-atlas-filter="Evento">Eventos</button>
+              <button data-atlas-filter="Relatório">Relatórios</button>
+            </div>
+            <div id="atlasRecords" class="records-grid"></div>
+          </section>
+
+          <section id="health" class="app-section" aria-labelledby="health-title">
+            <div class="section-head">
+              <div><p class="eyebrow">Saúde</p><h1 id="health-title">Monitoramento pessoal</h1><p>Medicamentos, sinais vitais, sono, água, exames e IA com aviso profissional.</p></div>
+              <button class="button button-primary quick-command" data-command="Me lembre de tomar remédio às 20h"><i data-lucide="pill"></i> Novo medicamento</button>
+            </div>
+            <div class="module-grid">
+              <article class="panel span-2"><div class="panel-header"><div><p class="eyebrow">Medicamentos</p><h3>Controle de horários</h3></div><i data-lucide="pill"></i></div><div id="medicationList" class="table-list"></div></article>
+              <article class="panel"><div class="panel-header"><div><p class="eyebrow">Sinais</p><h3>Hoje</h3></div><i data-lucide="activity"></i></div><div id="healthMetrics" class="metric-stack"></div></article>
+              <article class="panel span-2">
+                <div class="panel-header"><div><p class="eyebrow">Exames</p><h3>Leitura com Atlas AI</h3></div><i data-lucide="file-scan"></i></div>
+                <div class="upload-zone">
+                  <i data-lucide="upload-cloud"></i>
+                  <div><strong>Enviar laudo ou exame</strong><p>O arquivo é registrado localmente e a IA cria um resumo para a Central Atlas.</p></div>
+                  <label class="button button-soft file-button">Selecionar arquivo<input id="examUpload" type="file" accept=".pdf,.png,.jpg,.jpeg,.txt" /></label>
+                </div>
+                <p class="medical-note">Esta análise não substitui avaliação profissional.</p>
+              </article>
+              <article class="panel"><div class="panel-header"><div><p class="eyebrow">Bem-estar</p><h3>Água e sono</h3></div></div><div id="wellnessRings" class="ring-list"></div></article>
+            </div>
+          </section>
+
+          <section id="habits" class="app-section" aria-labelledby="habits-title">
+            <div class="section-head"><div><p class="eyebrow">Hábitos</p><h1 id="habits-title">Sequências, calendário e conquistas</h1><p>Marque hábitos, acompanhe sequência e alimente seus insights.</p></div><button class="button button-primary quick-command" data-command="Crie o hábito de estudar 45 minutos por dia"><i data-lucide="plus"></i> Novo hábito</button></div>
+            <div class="module-grid">
+              <article class="panel span-2"><div class="panel-header"><div><p class="eyebrow">Hábitos ativos</p><h3>Hoje</h3></div><i data-lucide="calendar-check"></i></div><div id="habitList" class="habit-list"></div></article>
+              <article class="panel"><div class="panel-header"><div><p class="eyebrow">Calendário</p><h3>Últimos 21 dias</h3></div></div><div id="habitCalendar" class="mini-calendar"></div></article>
+              <article class="panel span-3"><div class="panel-header"><div><p class="eyebrow">Conquistas</p><h3>Retenção diária</h3></div></div><div id="habitAchievements" class="achievement-grid"></div></article>
+            </div>
+          </section>
+
+          <section id="goals" class="app-section" aria-labelledby="goals-title">
+            <div class="section-head"><div><p class="eyebrow">Metas</p><h1 id="goals-title">Objetivos mensuráveis</h1><p>Prazo, progresso, valor restante, percentual e recomendação automática de próximos passos.</p></div><button class="button button-primary quick-command" data-command="Defina uma meta para economizar R$5000"><i data-lucide="target"></i> Nova meta</button></div>
+            <div id="goalsGrid" class="goal-grid"></div>
+          </section>
+
+          <section id="productivity" class="app-section" aria-labelledby="productivity-title">
+            <div class="section-head"><div><p class="eyebrow">Produtividade</p><h1 id="productivity-title">Tarefas, projetos e foco</h1><p>Kanban, prioridades, Pomodoro e matriz Eisenhower.</p></div><button class="button button-primary quick-command" data-command="Crie uma tarefa para revisar contrato amanhã"><i data-lucide="list-plus"></i> Nova tarefa</button></div>
+            <div class="productivity-grid">
+              <article class="panel span-2"><div class="panel-header"><div><p class="eyebrow">Kanban</p><h3>Projetos ativos</h3></div><i data-lucide="kanban-square"></i></div><div id="kanbanBoard" class="kanban-board"></div></article>
+              <article class="panel"><div class="panel-header"><div><p class="eyebrow">Pomodoro</p><h3>Foco profundo</h3></div></div><div class="pomodoro"><strong id="pomodoroTimer">25:00</strong><p>Ciclo de foco para Estudo de inglês</p><button id="pomodoroButton" class="button button-soft" type="button"><i data-lucide="play"></i> Iniciar</button></div></article>
+              <article class="panel span-3"><div class="panel-header"><div><p class="eyebrow">Matriz Eisenhower</p><h3>Prioridades</h3></div></div><div id="eisenhowerMatrix" class="matrix-grid"></div></article>
+            </div>
+          </section>
+
+          <section id="finance" class="app-section" aria-labelledby="finance-title">
+            <div class="section-head">
+              <div><p class="eyebrow">Finanças</p><h1 id="finance-title">Controle financeiro completo</h1><p>Receitas, despesas, gastos fixos, metas financeiras, Open Finance, extrato e IA.</p></div>
+              <button id="openFinanceButton" class="button button-primary" type="button"><i data-lucide="landmark"></i> Conectar Open Finance</button>
+            </div>
+            <div class="finance-layout">
+              <article class="panel span-2">
+                <div class="finance-overview">
+                  <div><span>Entradas</span><strong id="financeIncome">R$ 0</strong></div>
+                  <div><span>Saídas</span><strong id="financeExpense">R$ 0</strong></div>
+                  <div><span>Saldo</span><strong id="financeTotalBalance">R$ 0</strong></div>
+                </div>
+                <form id="transactionForm" class="inline-form">
+                  <select id="transactionType" required><option value="income">Receita</option><option value="expense">Despesa</option></select>
+                  <input id="transactionDescription" type="text" placeholder="Descrição" required />
+                  <select id="transactionCategory" required></select>
+                  <input id="transactionAmount" type="number" min="0.01" step="0.01" placeholder="Valor" required />
+                  <button class="button button-primary" type="submit"><i data-lucide="plus"></i> Adicionar</button>
+                </form>
+                <div class="filter-row">
+                  <button class="filter-button active" data-extract-filter="month">Mês</button>
+                  <button class="filter-button" data-extract-filter="week">Semana</button>
+                  <button class="filter-button" data-extract-filter="today">Hoje</button>
+                  <button class="filter-button" data-extract-filter="all">Tudo</button>
+                </div>
+                <div id="extractList" class="extract-list"></div>
+              </article>
+              <article class="panel">
+                <div class="panel-header"><div><p class="eyebrow">Gastos fixos</p><h3>Recorrência</h3></div><i data-lucide="repeat"></i></div>
+                <form id="recurringForm" class="stack-form">
+                  <input id="recurringName" type="text" placeholder="Nome" required />
+                  <input id="recurringAmount" type="number" min="0.01" step="0.01" placeholder="Valor" required />
+                  <select id="recurringFrequency"><option>Mensal</option><option>Semanal</option><option>Anual</option></select>
+                  <button class="button button-soft" type="submit"><i data-lucide="plus"></i> Adicionar fixo</button>
+                </form>
+                <div id="recurringList" class="stack-list"></div>
+              </article>
+              <article class="panel">
+                <div class="panel-header"><div><p class="eyebrow">Metas financeiras</p><h3>Objetivos</h3></div><i data-lucide="piggy-bank"></i></div>
+                <form id="financeGoalForm" class="stack-form">
+                  <input id="financeGoalName" type="text" placeholder="Comprar carro, viagem..." required />
+                  <input id="financeGoalTarget" type="number" min="1" step="1" placeholder="Valor alvo" required />
+                  <input id="financeGoalSaved" type="number" min="0" step="1" placeholder="Valor atual" required />
+                  <input id="financeGoalDeadline" type="date" required />
+                  <button class="button button-soft" type="submit"><i data-lucide="target"></i> Criar meta</button>
+                </form>
+                <div id="financeGoalList" class="stack-list"></div>
+              </article>
+              <article class="panel span-3">
+                <div class="panel-header"><div><p class="eyebrow">Categorias</p><h3>Distribuição mensal</h3></div><button id="financeInsightButton" class="button button-soft" type="button"><i data-lucide="sparkles"></i> Gerar insight</button></div>
+                <div id="financeCategoryList" class="finance-category-list"></div>
+              </article>
+            </div>
+          </section>
+
+          <section id="calendar" class="app-section" aria-labelledby="calendar-title">
+            <div class="section-head"><div><p class="eyebrow">Calendário Inteligente</p><h1 id="calendar-title">Agenda, eventos e lembretes</h1><p>Compromissos e lembretes criados pela IA aparecem automaticamente aqui.</p></div><button class="button button-primary quick-command" data-command="Marque uma reunião amanhã às 10h"><i data-lucide="calendar-plus"></i> Novo evento</button></div>
+            <div class="module-grid">
+              <article class="panel span-2"><div class="panel-header"><div><p class="eyebrow">Semana</p><h3>Agenda sincronizada</h3></div></div><div id="weekPlanner" class="week-planner"></div></article>
+              <article class="panel"><div class="panel-header"><div><p class="eyebrow">Integrações</p><h3>Calendários</h3></div></div><div id="calendarIntegrations" class="integration-list"></div></article>
+            </div>
+          </section>
+
+          <section id="analytics" class="app-section" aria-labelledby="analytics-title">
+            <div class="section-head"><div><p class="eyebrow">Dashboard Analítico</p><h1 id="analytics-title">Leitura completa da vida</h1><p>Saúde, hábitos, produtividade, finanças e metas em visão executiva.</p></div></div>
+            <div class="analytics-grid">
+              <article class="panel span-2"><div class="panel-header"><div><p class="eyebrow">Índice Atlas</p><h3>Últimos 7 dias</h3></div></div><div id="atlasChart" class="line-chart" aria-label="Grafico de evolução semanal"></div></article>
+              <article class="panel"><div class="panel-header"><div><p class="eyebrow">Resumo</p><h3>Score geral</h3></div></div><div class="score-card"><strong id="atlasScore">86</strong><span>Controle alto</span></div></article>
+              <article class="panel span-3"><div id="analyticsModules" class="analytics-modules"></div></article>
+            </div>
+          </section>
+
+          <section id="plans" class="app-section" aria-labelledby="plans-title">
+            <div class="plans-hero">
+              <div>
+                <p class="eyebrow">Planos Atlas One</p>
+                <h1 id="plans-title">Escolha o nível de inteligência da sua vida.</h1>
+                <p>
+                  Comece grátis, evolua para memória inteligente, Open Finance, relatórios
+                  executivos e uma assistente pessoal cada vez mais contextual.
+                </p>
+              </div>
+              <div class="billing-toggle" id="billingToggle" aria-label="Alternar cobrança">
+                <button class="active" data-billing="monthly" type="button">Mensal</button>
+                <button data-billing="yearly" type="button">Anual <span>até 20% off</span></button>
+              </div>
+            </div>
+
+            <div id="plansGrid" class="plans-grid"></div>
+
+            <article class="panel comparison-panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Comparação</p>
+                  <h3>Recursos por plano</h3>
+                </div>
+              </div>
+              <div class="comparison-scroll">
+                <table class="comparison-table">
+                  <thead>
+                    <tr>
+                      <th>Recurso</th>
+                      <th>Free</th>
+                      <th>Plus</th>
+                      <th>Pro</th>
+                      <th>Elite</th>
+                    </tr>
+                  </thead>
+                  <tbody id="comparisonBody"></tbody>
+                </table>
+              </div>
+            </article>
+
+            <div class="subscription-grid">
+              <article class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Minha Assinatura</p>
+                    <h3>Gestão do plano</h3>
+                  </div>
+                  <i data-lucide="credit-card"></i>
+                </div>
+                <div id="subscriptionSummary" class="subscription-summary"></div>
+                <div class="record-actions">
+                  <button id="upgradePlanButton" class="button button-primary" type="button"><i data-lucide="arrow-up-circle"></i> Upgrade</button>
+                  <button id="downgradePlanButton" class="button button-soft" type="button"><i data-lucide="arrow-down-circle"></i> Downgrade</button>
+                  <button id="cancelPlanButton" class="button button-ghost" type="button"><i data-lucide="x-circle"></i> Cancelar</button>
+                </div>
+              </article>
+              <article class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Histórico</p>
+                    <h3>Pagamentos</h3>
+                  </div>
+                  <i data-lucide="receipt"></i>
+                </div>
+                <div id="paymentHistory" class="stack-list"></div>
+              </article>
+              <article class="panel">
+                <div class="panel-header">
+                  <div>
+                    <p class="eyebrow">Gateways</p>
+                    <h3>Arquitetura preparada</h3>
+                  </div>
+                  <i data-lucide="landmark"></i>
+                </div>
+                <div id="gatewayList" class="integration-list"></div>
+              </article>
+            </div>
+          </section>
+
+          <section id="reports" class="app-section" aria-labelledby="reports-title">
+            <div class="section-head">
+              <div><p class="eyebrow">Relatórios em PDF</p><h1 id="reports-title">Exportação profissional</h1><p>Gere relatório financeiro, saúde, metas ou produtividade com resumo da IA.</p></div>
+            </div>
+            <article class="panel">
+              <form id="reportForm" class="report-form">
+                <label><span>Tipo</span><select id="reportType"><option value="financeiro">Financeiro</option><option value="saude">Saúde</option><option value="metas">Metas</option><option value="produtividade">Produtividade</option></select></label>
+                <label><span>Mês</span><select id="reportMonth"></select></label>
+                <label><span>Ano</span><input id="reportYear" type="number" min="2024" max="2100" /></label>
+                <label><span>Intervalo personalizado</span><input id="reportRange" type="text" placeholder="Ex: 01/06 a 30/06" /></label>
+                <button class="button button-primary" type="submit"><i data-lucide="file-down"></i> Gerar PDF</button>
+              </form>
+            </article>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div id="accountPanel" class="drawer hidden" aria-hidden="true">
+      <div class="drawer-card">
+        <div class="panel-header"><div><p class="eyebrow">Conta</p><h3>Configurações avançadas</h3></div><button id="closeAccount" class="icon-button" type="button"><i data-lucide="x"></i></button></div>
+        <div class="security-list">
+          <div><i data-lucide="lock-keyhole"></i><span>Criptografia local e sessão ativa</span></div>
+          <div><i data-lucide="scale"></i><span>Preferências LGPD e consentimentos</span></div>
+          <div><i data-lucide="database-backup"></i><span>Backup automático planejado no backend</span></div>
+          <div><i data-lucide="list-checks"></i><span>Logs de auditoria da conta</span></div>
+        </div>
+        <button id="logoutButton" class="button button-ghost" type="button"><i data-lucide="log-out"></i> Sair da conta</button>
+      </div>
+    </div>
+
+    <div id="checkoutModal" class="modal hidden" aria-hidden="true">
+      <div class="modal-card">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Checkout Atlas One</p>
+            <h3 id="checkoutTitle">Assinar plano</h3>
+          </div>
+          <button id="closeCheckout" class="icon-button" type="button" aria-label="Fechar checkout"><i data-lucide="x"></i></button>
+        </div>
+        <div class="checkout-steps">
+          <span class="active" data-step-label="1">1. Plano</span>
+          <span data-step-label="2">2. Dados</span>
+          <span data-step-label="3">3. Pagamento</span>
+          <span data-step-label="4">4. Confirmação</span>
+        </div>
+        <form id="checkoutForm" class="checkout-form">
+          <div class="checkout-step active" data-checkout-step="1">
+            <div id="checkoutPlanSummary" class="checkout-summary"></div>
+            <button class="button button-primary" type="button" data-next-checkout>Continuar</button>
+          </div>
+          <div class="checkout-step" data-checkout-step="2">
+            <label><span>Nome completo</span><input id="checkoutName" type="text" required /></label>
+            <label><span>Email de cobrança</span><input id="checkoutEmail" type="email" required /></label>
+            <label><span>CPF/CNPJ</span><input id="checkoutDocument" type="text" required placeholder="000.000.000-00" /></label>
+            <button class="button button-primary" type="button" data-next-checkout>Continuar para pagamento</button>
+          </div>
+          <div class="checkout-step" data-checkout-step="3">
+            <label><span>Forma de pagamento</span><select id="paymentMethod"><option>PIX</option><option>Cartão de Crédito</option><option>Cartão de Débito</option><option>Visa</option><option>Mastercard</option><option>PayPal</option></select></label>
+            <label><span>Gateway</span><select id="paymentGateway"><option>Mercado Pago</option><option>Asaas</option><option>Stripe</option></select></label>
+            <p class="helper-copy">Checkout demonstrativo. Em produção, esta etapa cria uma sessão segura no gateway escolhido.</p>
+            <button class="button button-primary" type="button" data-next-checkout>Confirmar assinatura</button>
+          </div>
+          <div class="checkout-step" data-checkout-step="4">
+            <div class="success-state">
+              <i data-lucide="badge-check"></i>
+              <strong>Assinatura ativada</strong>
+              <p id="checkoutConfirmation">Seu plano Atlas foi atualizado.</p>
+            </div>
+            <button id="finishCheckout" class="button button-primary" type="button">Ir para Minha Assinatura</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="upgradeModal" class="modal hidden" aria-hidden="true">
+      <div class="modal-card compact">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Upgrade inteligente</p>
+            <h3 id="upgradeTitle">Recurso premium</h3>
+          </div>
+          <button id="closeUpgrade" class="icon-button" type="button" aria-label="Fechar modal"><i data-lucide="x"></i></button>
+        </div>
+        <p id="upgradeMessage" class="modal-copy">Este recurso está disponível em planos pagos.</p>
+        <div class="record-actions">
+          <button id="upgradeModalButton" class="button button-primary" type="button">Fazer Upgrade</button>
+          <button id="stayFreeButton" class="button button-ghost" type="button">Continuar no Plano Gratuito</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

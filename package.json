@@ -1,0 +1,17 @@
+{
+  "name": "atlas-one",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Atlas One personal operating system SaaS prototype with OpenAI backend proxy.",
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "build": "pnpm install --shamefully-hoist",
+    "start": "node server.js",
+    "dev": "node server.js",
+    "check": "node --check app.js && node --check server.js && node --check scripts/write-config.js && node --check scripts/build-frontend.js && node --check scripts/verify-render-entrypoint.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.13.1"
+  }
+}
