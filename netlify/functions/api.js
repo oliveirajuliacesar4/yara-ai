@@ -28,7 +28,7 @@ exports.handler = async (event) => {
         200,
         {
           status: "ok",
-          service: "atlas-one-netlify-api",
+          service: "yara-ai-netlify-api",
           integrations: {
             openai: Boolean(getOpenAIKey()),
             model: OPENAI_MODEL,
@@ -42,8 +42,8 @@ exports.handler = async (event) => {
       return handleAdminMetrics(event, cors);
     }
 
-    if (event.httpMethod === "POST" && path === "/atlas-ai") {
-      return await handleAtlasAi(event, cors);
+    if (event.httpMethod === "POST" && path === "/yara-ai") {
+      return await handleYaraAi(event, cors);
     }
 
     if (event.httpMethod === "POST" && path === "/payments/checkout") {
@@ -66,14 +66,14 @@ exports.handler = async (event) => {
   } catch (error) {
     metrics.apiErrors += 1;
     log("api_error", "Erro interno na API serverless.");
-    return json(500, { error: "Erro interno do Atlas API." }, cors);
+    return json(500, { error: "Erro interno da API YARA." }, cors);
   }
 };
 
-async function handleAtlasAi(event, cors) {
+async function handleYaraAi(event, cors) {
   const apiKey = getOpenAIKey();
   if (!apiKey) {
-    return json(503, { error: "Atlas AI indisponível. OPENAI_API_KEY não configurada no backend." }, cors);
+    return json(503, { error: "YARA AI indisponível. OPENAI_API_KEY não configurada no backend." }, cors);
   }
 
   const body = parseBody(event);
@@ -90,13 +90,13 @@ async function handleAtlasAi(event, cors) {
     },
     body: JSON.stringify({
       model: OPENAI_MODEL,
-      instructions: buildAtlasInstructions(),
+      instructions: buildYaraInstructions(),
       input: [
         {
           role: "user",
           content:
             `Mensagem do usuário:\n${message}\n\n` +
-            `Contexto atual do Atlas One em JSON:\n${JSON.stringify(body.context || {}, null, 2)}`,
+            `Contexto atual da YARA AI em JSON:\n${JSON.stringify(body.context || {}, null, 2)}`,
         },
       ],
     }),
@@ -109,7 +109,7 @@ async function handleAtlasAi(event, cors) {
     return json(response.status, { error: "Falha ao gerar resposta da IA.", reason: classifyOpenAIError(response.status, payload) }, cors);
   }
 
-  return json(200, parseAtlasJson(extractOpenAIText(payload)), cors);
+  return json(200, parseYaraJson(extractOpenAIText(payload)), cors);
 }
 
 function getOpenAIKey() {
@@ -177,21 +177,21 @@ function handleAdminMetrics(event, cors) {
   );
 }
 
-function buildAtlasInstructions() {
+function buildYaraInstructions() {
   return [
-    "Você é o Atlas AI, assistente inteligente do SaaS Atlas One.",
+    "Você é a YARA AI, assistente inteligente da aplicação YARA.",
     "Responda em português do Brasil com tom claro, premium, prático e contextual.",
     "Use o contexto enviado para consultar metas, hábitos, finanças, agenda, saúde, assinatura e memórias.",
     "Quando faltar informação crítica, faça perguntas objetivas antes de assumir.",
     "Quando criar planos, entregue detalhes úteis e salve a estrutura em records/actions.",
-    "Sempre informe onde algo foi salvo no Atlas One.",
+    "Sempre informe onde algo foi salvo na YARA.",
     "Para saúde, inclua: Esta análise não substitui avaliação profissional.",
     "Retorne somente JSON válido, sem markdown.",
     JSON.stringify({
       reply: "Resposta final ao usuário.",
       records: [{ type: "Plano|Meta|Rotina|Evento|Relatório|Lista|Análise", title: "Título", content: "Conteúdo salvo" }],
       actions: {
-        goals: [{ title: "Meta", description: "Descrição", progress: 0, deadline: "90 dias", category: "Atlas AI" }],
+        goals: [{ title: "Meta", description: "Descrição", progress: 0, deadline: "90 dias", category: "YARA AI" }],
         reminders: [{ title: "Lembrete", due: "20:00", critical: true }],
         events: [{ title: "Evento", time: "10:00", type: "Agenda" }],
         tasks: [{ title: "Tarefa", priority: "Média" }],
@@ -211,25 +211,25 @@ function extractOpenAIText(payload) {
   return chunks.join("\n").trim();
 }
 
-function parseAtlasJson(rawText) {
+function parseYaraJson(rawText) {
   try {
-    return normalizeAtlasPayload(JSON.parse(rawText));
+    return normalizeYaraPayload(JSON.parse(rawText));
   } catch {
     const match = rawText.match(/\{[\s\S]*\}/);
     if (match) {
       try {
-        return normalizeAtlasPayload(JSON.parse(match[0]));
+        return normalizeYaraPayload(JSON.parse(match[0]));
       } catch {
         // Fallback below.
       }
     }
-    return normalizeAtlasPayload({ reply: rawText, records: [], actions: {} });
+    return normalizeYaraPayload({ reply: rawText, records: [], actions: {} });
   }
 }
 
-function normalizeAtlasPayload(payload) {
+function normalizeYaraPayload(payload) {
   return {
-    reply: String(payload.reply || "Resposta gerada pelo Atlas AI."),
+    reply: String(payload.reply || "Resposta gerada pela YARA AI."),
     records: Array.isArray(payload.records) ? payload.records : [],
     actions: {
       goals: Array.isArray(payload.actions?.goals) ? payload.actions.goals : [],
@@ -247,7 +247,7 @@ async function createStripeCheckout(body) {
     cancel_url: `${PUBLIC_APP_URL}?checkout=cancel`,
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": "brl",
-    "line_items[0][price_data][product_data][name]": `Atlas One ${body.plan}`,
+    "line_items[0][price_data][product_data][name]": `YARA AI ${body.plan}`,
     "line_items[0][price_data][unit_amount]": String(Math.round(Number(body.amount || 0) * 100)),
     customer_email: body.customer?.email || "",
   });
@@ -272,7 +272,7 @@ async function createMercadoPagoPreference(body) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      items: [{ title: `Atlas One ${body.plan}`, quantity: 1, unit_price: Number(body.amount), currency_id: "BRL" }],
+      items: [{ title: `YARA AI ${body.plan}`, quantity: 1, unit_price: Number(body.amount), currency_id: "BRL" }],
       payer: { email: body.customer?.email },
       back_urls: {
         success: `${PUBLIC_APP_URL}?checkout=success`,
@@ -295,8 +295,8 @@ async function createAsaasPayment(body) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      name: `Atlas One ${body.plan}`,
-      description: `Assinatura Atlas One ${body.plan}`,
+      name: `YARA AI ${body.plan}`,
+      description: `Assinatura YARA AI ${body.plan}`,
       value: Number(body.amount),
       billingType: /pix/i.test(body.method || "") ? "PIX" : /d[eé]bito/i.test(body.method || "") ? "DEBIT_CARD" : "CREDIT_CARD",
       chargeType: "DETACHED",
@@ -313,7 +313,7 @@ function corsHeaders(event) {
   return {
     "Access-Control-Allow-Origin": allowed ? origin || "*" : "null",
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type,Authorization,X-Atlas-User",
+    "Access-Control-Allow-Headers": "Content-Type,Authorization,X-Yara-User",
     "Content-Type": "application/json; charset=utf-8",
   };
 }

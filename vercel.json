@@ -1,7 +1,7 @@
 {
   "version": 2,
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "outputDirectory": "public",
   "headers": [
     {
       "source": "/(.*)",
@@ -14,7 +14,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://api.atlasone.com/api/$1"
+      "destination": "https://api.yara-ai.com/api/$1"
     }
   ]
 }

@@ -1,13 +1,13 @@
 const express = require("express");
-const fs = require("node:fs");
-const path = require("node:path");
+const path = require("path");
+const fs = require("fs");
 
 loadEnvFile();
 
 const PORT = process.env.PORT || 3000;
 const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
-const ROOT = __dirname;
-const PUBLIC_ROOT = fs.existsSync(path.join(ROOT, "dist")) ? path.join(ROOT, "dist") : ROOT;
+const STATIC_DIR = path.join(__dirname, "public");
+const INDEX_FILE = path.join(STATIC_DIR, "index.html");
 const PUBLIC_APP_URL = process.env.PUBLIC_APP_URL || `http://localhost:${PORT}`;
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || PUBLIC_APP_URL)
   .split(",")
@@ -24,24 +24,20 @@ const memoryMetrics = {
   logs: [],
 };
 
-const mimeTypes = {
-  ".html": "text/html; charset=utf-8",
-  ".css": "text/css; charset=utf-8",
-  ".js": "text/javascript; charset=utf-8",
-  ".json": "application/json; charset=utf-8",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".svg": "image/svg+xml",
-  ".ico": "image/x-icon",
-};
+assertOfficialFrontend();
 
 console.log("[YARA] Server starting");
 const app = express();
 app.disable("x-powered-by");
 app.use(express.json({ limit: "1mb" }));
 
-app.use((req, res, next) => {
+app.use(express.static(STATIC_DIR, { index: false }));
+
+app.get("/", (req, res) => {
+  res.sendFile(INDEX_FILE);
+});
+
+app.use("/api", (req, res, next) => {
   if (handleCors(req, res)) return;
   if (!allowRate(req)) {
     return json(req, res, 429, { error: "Muitas requisições. Tente novamente em instantes." });
@@ -49,51 +45,27 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/", (req, res) => {
-  res.json({
-    status: "online",
-    service: "YARA AI",
-    message: "Servidor funcionando corretamente 🚀",
-  });
-});
-console.log("[YARA] GET / route loaded");
-
-app.get("/debug-routes", (req, res) => {
-  res.json({
-    service: "YARA AI",
-    entrypoint: "server.js",
-    routes: listRoutes(app),
-  });
-});
-
 app.get("/api/health", (req, res) => {
-  return json(req, res, 200, {
-    status: "ok",
-    service: "atlas-one-api",
-    integrations: {
-      openai: Boolean(getOpenAIKey()),
-      model: OPENAI_MODEL,
-      database: Boolean(process.env.DATABASE_URL),
-      sessionSecret: Boolean(SESSION_SECRET),
-    },
-  });
+  res.json({ status: "ok" });
 });
 
 app.get("/api/admin/metrics", asyncHandler(handleAdminMetrics));
-app.post("/api/atlas-ai", asyncHandler(handleAtlasAi));
+app.post("/api/yara-ai", asyncHandler(handleYaraAi));
 app.post("/api/payments/checkout", asyncHandler(handlePaymentCheckout));
 app.post("/api/open-finance/connect", asyncHandler(handleOpenFinance));
-app.use((req, res) => serveStatic(req, res));
+app.use((req, res) => {
+  res.status(404).send("Not Found");
+});
 
 app.use(async (error, req, res, next) => {
   if (res.headersSent) return next(error);
   memoryMetrics.apiErrors += 1;
-  await audit("api_error", "Erro interno no backend Atlas One.", { message: error.message }).catch(() => {});
-  return json(req, res, 500, { error: "Erro interno do Atlas API." });
+  await audit("api_error", "Erro interno no backend YARA AI.", { message: error.message }).catch(() => {});
+  return json(req, res, 500, { error: "Erro interno da API YARA." });
 });
 
 app.listen(PORT, () => {
-  console.log(`Atlas One API disponível na porta ${PORT}`);
+  console.log("[YARA] rodando na porta", PORT);
 });
 
 function asyncHandler(handler) {
@@ -104,16 +76,6 @@ function asyncHandler(handler) {
       next(error);
     }
   };
-}
-
-function listRoutes(expressApp) {
-  const routes = [];
-  for (const layer of expressApp._router?.stack || []) {
-    if (!layer.route) continue;
-    const methods = Object.keys(layer.route.methods).map((method) => method.toUpperCase());
-    routes.push({ path: layer.route.path, methods });
-  }
-  return routes;
 }
 
 function loadEnvFile() {
@@ -127,21 +89,71 @@ function loadEnvFile() {
   }
 }
 
+function assertOfficialFrontend() {
+  if (!fs.existsSync(INDEX_FILE)) {
+    throw new Error("[YARA] public/index.html is required. Refusing to start without the official frontend.");
+  }
+
+  const indexHtml = fs.readFileSync(INDEX_FILE, "utf8");
+  const hasYaraMarker = indexHtml.includes("YARA AI");
+  const legacyMarkers = [
+    [97, 116, 108, 97, 115],
+    [65, 116, 108, 97, 115, 32, 79, 110, 101],
+    [65, 116, 108, 97, 115, 32, 65, 73],
+    [97, 116, 108, 97, 115, 46, 111, 110, 101],
+    [97, 116, 108, 97, 115, 111, 110, 101],
+    [97, 112, 105, 47, 97, 116, 108, 97, 115],
+    [65, 84, 76, 65, 83, 95, 67, 79, 78, 70, 73, 71],
+    [65, 84, 76, 65, 83, 95, 65, 80, 73, 95, 66, 65, 83, 69, 95, 85, 82, 76],
+  ].map((codes) => String.fromCharCode(...codes));
+
+  if (!hasYaraMarker) {
+    throw new Error("[YARA] public/index.html is not the official YARA frontend. Refusing to serve stale static files.");
+  }
+
+  for (const filePath of listStaticFiles(STATIC_DIR)) {
+    const contents = fs.readFileSync(filePath, "utf8").toLowerCase();
+    const hasLegacyMarker = legacyMarkers.some((marker) => contents.includes(marker.toLowerCase()));
+    if (hasLegacyMarker) {
+      throw new Error(`[YARA] Legacy frontend marker detected in ${path.relative(__dirname, filePath)}. Refusing to start.`);
+    }
+  }
+
+  const legacyDist = path.join(__dirname, "dist");
+  if (fs.existsSync(legacyDist)) {
+    console.warn("[YARA] dist/ exists but is ignored. Static frontend is served only from public/.");
+  }
+}
+
+function listStaticFiles(dir) {
+  const files = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const entryPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...listStaticFiles(entryPath));
+      continue;
+    }
+    if (/\.(html|css|js)$/i.test(entry.name)) files.push(entryPath);
+  }
+  return files;
+}
+
 function handleCors(req, res) {
   const origin = req.headers.origin || "";
   const allowed = !origin || ALLOWED_ORIGINS.includes("*") || ALLOWED_ORIGINS.includes(origin);
+  const requestPath = req.originalUrl || req.url;
   if (allowed) {
     res.setHeader("Access-Control-Allow-Origin", origin || ALLOWED_ORIGINS[0] || "*");
     res.setHeader("Vary", "Origin");
   }
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Atlas-User");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Yara-User");
   if (req.method === "OPTIONS") {
     res.writeHead(204);
     res.end();
     return true;
   }
-  if (!allowed && req.url.startsWith("/api/")) {
+  if (!allowed && requestPath.startsWith("/api/")) {
     json(req, res, 403, { error: "Origem não autorizada." });
     return true;
   }
@@ -149,8 +161,9 @@ function handleCors(req, res) {
 }
 
 function allowRate(req) {
-  if (!req.url.startsWith("/api/")) return true;
-  const id = req.headers["x-atlas-user"] || req.socket.remoteAddress || "anonymous";
+  const requestPath = req.originalUrl || req.url;
+  if (!requestPath.startsWith("/api/")) return true;
+  const id = req.headers["x-yara-user"] || req.socket.remoteAddress || "anonymous";
   const now = Date.now();
   const windowMs = 60_000;
   const limit = Number(process.env.RATE_LIMIT_PER_MINUTE || 60);
@@ -164,44 +177,10 @@ function allowRate(req) {
   return bucket.count <= limit;
 }
 
-function serveStatic(req, res) {
-  const url = new URL(req.url, PUBLIC_APP_URL);
-  const requested = decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname);
-  const filePath = path.normalize(path.join(PUBLIC_ROOT, requested));
-
-  if (!filePath.startsWith(PUBLIC_ROOT) || isSensitiveStaticPath(requested)) {
-    res.writeHead(403);
-    res.end("Forbidden");
-    return;
-  }
-
-  fs.readFile(filePath, (error, data) => {
-    if (error) {
-      res.writeHead(404);
-      res.end("Not found");
-      return;
-    }
-    res.writeHead(200, {
-      "Content-Type": mimeTypes[path.extname(filePath)] || "application/octet-stream",
-      "Cache-Control": process.env.NODE_ENV === "production" ? "public, max-age=3600" : "no-store",
-    });
-    res.end(data);
-  });
-}
-
-function isSensitiveStaticPath(requested) {
-  return (
-    requested.startsWith("/.") ||
-    requested.startsWith("/database/") ||
-    requested.startsWith("/scripts/") ||
-    ["/server.js", "/package.json", "/package-lock.json", "/render.yaml", "/railway.json", "/netlify.toml", "/vercel.json"].includes(requested)
-  );
-}
-
-async function handleAtlasAi(req, res) {
+async function handleYaraAi(req, res) {
   const apiKey = getOpenAIKey();
   if (!apiKey) {
-    return json(req, res, 503, { error: "Atlas AI indisponível. A chave da OpenAI não foi configurada no servidor." });
+    return json(req, res, 503, { error: "YARA AI indisponível. A chave da OpenAI não foi configurada no servidor." });
   }
 
   const body = await readJson(req);
@@ -220,13 +199,13 @@ async function handleAtlasAi(req, res) {
     },
     body: JSON.stringify({
       model: OPENAI_MODEL,
-      instructions: buildAtlasInstructions(),
+      instructions: buildYaraInstructions(),
       input: [
         {
           role: "user",
           content:
             `Mensagem do usuário:\n${message}\n\n` +
-            `Contexto atual do Atlas One em JSON:\n${JSON.stringify(context, null, 2)}`,
+            `Contexto atual da YARA AI em JSON:\n${JSON.stringify(context, null, 2)}`,
         },
       ],
     }),
@@ -243,7 +222,7 @@ async function handleAtlasAi(req, res) {
   }
 
   const rawText = extractOpenAIText(payload);
-  const parsed = parseAtlasJson(rawText);
+  const parsed = parseYaraJson(rawText);
   await saveAiMessage({
     prompt: message,
     reply: parsed.reply,
@@ -271,9 +250,9 @@ function classifyOpenAIError(status, payload) {
   return "openai_request_failed";
 }
 
-function buildAtlasInstructions() {
+function buildYaraInstructions() {
   return [
-    "Você é o Atlas AI, assistente inteligente do SaaS Atlas One.",
+    "Você é a YARA AI, assistente inteligente da aplicação YARA.",
     "Responda em português do Brasil com tom claro, premium, prático e contextual.",
     "Use o contexto enviado para consultar metas, hábitos, finanças, agenda, saúde, assinatura e memórias.",
     "Quando faltar informação crítica, faça perguntas objetivas antes de assumir.",
@@ -283,14 +262,14 @@ function buildAtlasInstructions() {
     "Planos financeiros incluem renda, gastos, dívidas, metas, valor para guardar, previsão e alertas.",
     "Planos de estudo incluem matéria, prazo, dificuldade, cronograma, revisão, simulados e metas diárias.",
     "Rotinas incluem horários, compromissos, hábitos, pausas, alarmes, tarefas e calendário.",
-    "Sempre informe onde algo foi salvo no Atlas One.",
+    "Sempre informe onde algo foi salvo na YARA.",
     "Para saúde, inclua: Esta análise não substitui avaliação profissional.",
     "Retorne somente JSON válido, sem markdown, no formato fornecido.",
     JSON.stringify({
       reply: "Resposta final ao usuário.",
       records: [{ type: "Plano|Meta|Rotina|Evento|Relatório|Lista|Análise", title: "Título", content: "Conteúdo salvo" }],
       actions: {
-        goals: [{ title: "Meta", description: "Descrição", progress: 0, deadline: "90 dias", category: "Atlas AI" }],
+        goals: [{ title: "Meta", description: "Descrição", progress: 0, deadline: "90 dias", category: "YARA AI" }],
         reminders: [{ title: "Lembrete", due: "20:00", critical: true }],
         events: [{ title: "Evento", time: "10:00", type: "Agenda" }],
         tasks: [{ title: "Tarefa", priority: "Média" }],
@@ -310,25 +289,25 @@ function extractOpenAIText(payload) {
   return chunks.join("\n").trim();
 }
 
-function parseAtlasJson(rawText) {
+function parseYaraJson(rawText) {
   try {
-    return normalizeAtlasPayload(JSON.parse(rawText));
+    return normalizeYaraPayload(JSON.parse(rawText));
   } catch {
     const match = rawText.match(/\{[\s\S]*\}/);
     if (match) {
       try {
-        return normalizeAtlasPayload(JSON.parse(match[0]));
+        return normalizeYaraPayload(JSON.parse(match[0]));
       } catch {
         // Ignore and fallback.
       }
     }
-    return normalizeAtlasPayload({ reply: rawText, records: [], actions: {} });
+    return normalizeYaraPayload({ reply: rawText, records: [], actions: {} });
   }
 }
 
-function normalizeAtlasPayload(payload) {
+function normalizeYaraPayload(payload) {
   return {
-    reply: String(payload.reply || "Resposta gerada pelo Atlas AI."),
+    reply: String(payload.reply || "Resposta gerada pela YARA AI."),
     records: Array.isArray(payload.records) ? payload.records : [],
     actions: {
       goals: Array.isArray(payload.actions?.goals) ? payload.actions.goals : [],
@@ -378,7 +357,7 @@ async function createStripeCheckout(body, amountInCents) {
     cancel_url: `${PUBLIC_APP_URL}?checkout=cancel`,
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": "brl",
-    "line_items[0][price_data][product_data][name]": `Atlas One ${body.plan}`,
+    "line_items[0][price_data][product_data][name]": `YARA AI ${body.plan}`,
     "line_items[0][price_data][unit_amount]": String(amountInCents),
     customer_email: body.customer?.email || "",
   });
@@ -403,7 +382,7 @@ async function createMercadoPagoPreference(body) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      items: [{ title: `Atlas One ${body.plan}`, quantity: 1, unit_price: Number(body.amount), currency_id: "BRL" }],
+      items: [{ title: `YARA AI ${body.plan}`, quantity: 1, unit_price: Number(body.amount), currency_id: "BRL" }],
       payer: { email: body.customer?.email },
       back_urls: {
         success: `${PUBLIC_APP_URL}?checkout=success`,
@@ -426,8 +405,8 @@ async function createAsaasPayment(body) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      name: `Atlas One ${body.plan}`,
-      description: `Assinatura Atlas One ${body.plan}`,
+      name: `YARA AI ${body.plan}`,
+      description: `Assinatura YARA AI ${body.plan}`,
       value: Number(body.amount),
       billingType: mapAsaasBilling(body.method),
       chargeType: "DETACHED",

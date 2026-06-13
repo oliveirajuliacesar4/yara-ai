@@ -1,17 +1,20 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const apiBaseUrl =
-  process.env.ATLAS_API_BASE_URL ||
+const configuredApiBaseUrl =
+  process.env.YARA_API_BASE_URL ||
   process.env.VITE_API_BASE_URL ||
   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "http://localhost:5500";
-const normalizedApiBaseUrl = apiBaseUrl.endsWith("/") ? apiBaseUrl.slice(0, -1) : apiBaseUrl;
+  "";
 
-const output = `window.ATLAS_CONFIG = {
-  API_BASE_URL: ${JSON.stringify(normalizedApiBaseUrl)}
+const output = `window.YARA_CONFIG = {
+  API_BASE_URL: ${
+    configuredApiBaseUrl
+      ? JSON.stringify(configuredApiBaseUrl.replace(/\/$/, ""))
+      : 'window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://localhost:3000" : window.location.origin'
+  }
 };
 `;
 
-fs.writeFileSync(path.join(__dirname, "..", "config.js"), output);
-console.log(`config.js generated with API_BASE_URL=${apiBaseUrl}`);
+fs.writeFileSync(path.join(__dirname, "..", "public", "config.js"), output);
+console.log(`config.js generated with API_BASE_URL=${configuredApiBaseUrl || "same-origin"}`);

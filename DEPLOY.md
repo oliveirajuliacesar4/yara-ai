@@ -1,4 +1,4 @@
-# Deploy de Produção - Atlas One
+# Deploy de Produção - YARA AI
 
 Este projeto está preparado para produção com frontend público, backend seguro, banco PostgreSQL e OpenAI no servidor.
 
@@ -16,7 +16,7 @@ Este projeto está preparado para produção com frontend público, backend segu
 Configure no painel da Vercel/Netlify:
 
 ```env
-ATLAS_API_BASE_URL=https://api.seudominio.com
+YARA_API_BASE_URL=https://api.seudominio.com
 ```
 
 Build:
@@ -25,7 +25,7 @@ Build:
 node scripts/build-frontend.js
 ```
 
-O build publica apenas `dist/`, contendo:
+O build valida e publica apenas `public/`, contendo:
 
 - `index.html`
 - `admin.html`
@@ -41,17 +41,17 @@ Publicação:
 Projeto Netlify criado nesta conta:
 
 - Site ID: `13659525-848f-4fcb-80f6-cec2f09f3ae3`
-- Nome: `atlas-one-juliaisis408`
-- URL pública prevista: `https://atlas-one-juliaisis408.netlify.app`
-- Painel: `https://app.netlify.com/projects/atlas-one-juliaisis408`
+- Nome: `yara-ai-juliaisis408`
+- URL pública prevista: `https://yara-ai-juliaisis408.netlify.app`
+- Painel: `https://app.netlify.com/projects/yara-ai-juliaisis408`
 
 Variáveis públicas já configuradas no Netlify:
 
-- `ATLAS_API_BASE_URL=https://atlas-one-juliaisis408.netlify.app`
-- `PUBLIC_APP_URL=https://atlas-one-juliaisis408.netlify.app`
-- `ALLOWED_ORIGINS=https://atlas-one-juliaisis408.netlify.app`
+- `YARA_API_BASE_URL=https://yara-ai-juliaisis408.netlify.app`
+- `PUBLIC_APP_URL=https://yara-ai-juliaisis408.netlify.app`
+- `ALLOWED_ORIGINS=https://yara-ai-juliaisis408.netlify.app`
 
-O build gera `config.js` com a URL pública do backend. O frontend nunca recebe `OPENAI_API_KEY`.
+O build gera `public/config.js` com a URL pública do backend. O frontend nunca recebe `OPENAI_API_KEY`.
 
 Para concluir o deploy pelo comando gerado pelo conector Netlify, execute em um ambiente com `npx` disponível:
 
@@ -77,8 +77,8 @@ Configure no host do backend:
 
 ```env
 NODE_ENV=production
-PUBLIC_APP_URL=https://atlasone.com
-ALLOWED_ORIGINS=https://atlasone.com,https://www.atlasone.com
+PUBLIC_APP_URL=https://yara-ai.com
+ALLOWED_ORIGINS=https://yara-ai.com,https://www.yara-ai.com
 Chave da OpenAI: configurar no painel da hospedagem como variável secreta do backend.
 OPENAI_MODEL=gpt-4.1-mini
 DATABASE_URL=postgresql://...
@@ -120,7 +120,7 @@ O comando `pnpm start` executa o script `start`, que aponta para `node server.js
 
 Se o Render continuar exibindo erros como `SESSION_SECRET is required but was not provided`, `DATABASE_URL must be set` ou `Cannot find module 'express'` antes dessas linhas, o serviço não está executando este código/commit ou está usando cache/comandos antigos. Nesse caso, confira no painel do Render:
 
-- Repository: deve ser o repositório correto do Atlas One.
+- Repository: deve ser o repositório correto da YARA AI.
 - Branch: deve ser a branch onde este `render.yaml` foi publicado.
 - Start Command: deve ser `pnpm start`; remova overrides antigos no painel.
 - Build Command: deve ser `pnpm install --shamefully-hoist`.
@@ -134,12 +134,12 @@ Manual Deploy -> Clear build cache & deploy
 
 Isso força um rebuild completo e elimina cache de uma versão antiga do backend.
 
-Se `dist/` existir no deploy do backend, o Node também consegue servir o frontend. Para arquitetura separada, publique `dist/` no provedor do frontend e `server.js` no provedor do backend.
+O backend Node serve somente `public/`. A pasta `dist/` é ignorada pelo servidor e removida pelo build para evitar frontend antigo.
 
 Endpoints:
 
 - `GET /api/health`
-- `POST /api/atlas-ai`
+- `POST /api/yara-ai`
 - `POST /api/payments/checkout`
 - `POST /api/open-finance/connect`
 - `GET /api/admin/metrics`
@@ -158,7 +158,7 @@ O schema cobre:
 
 - usuários
 - mensagens da IA
-- memórias do Meu Atlas
+- memórias da YARA
 - metas
 - tarefas
 - eventos
@@ -194,7 +194,7 @@ Não há simulação de conexão bancária real.
 Acesse:
 
 ```text
-https://atlasone.com/admin.html
+https://yara-ai.com/admin.html
 ```
 
 Informe:

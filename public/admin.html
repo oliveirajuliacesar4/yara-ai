@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YARA AI Admin</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="/">
+          <span class="brand-mark">Y</span>
+          <span>YARA AI</span>
+        </a>
+        <nav class="nav" aria-label="Admin">
+          <a href="/">Interface</a>
+          <a class="active" href="/admin.html">Admin</a>
+          <a href="/api/health">Health</a>
+        </nav>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Admin interno</p>
+            <h1>Operação YARA</h1>
+          </div>
+          <span class="status-pill">Produção</span>
+        </header>
+
+        <section class="panel">
+          <form id="adminForm" class="admin-form">
+            <label>
+              API
+              <input id="adminApiBase" type="url" placeholder="https://seu-servico.onrender.com" />
+            </label>
+            <label>
+              Token
+              <input id="adminToken" type="password" placeholder="ADMIN_TOKEN" />
+            </label>
+            <button class="primary-button" type="submit">Carregar métricas</button>
+          </form>
+        </section>
+
+        <section id="adminMetrics" class="metric-grid"></section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Logs importantes</p>
+              <h2>Eventos recentes</h2>
+            </div>
+          </div>
+          <div id="adminLogs" class="stack-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="config.js"></script>
+    <script>
+      const apiBase = document.getElementById("adminApiBase");
+      const token = document.getElementById("adminToken");
+      const metrics = document.getElementById("adminMetrics");
+      const logs = document.getElementById("adminLogs");
+
+      apiBase.value = (window.YARA_CONFIG?.API_BASE_URL || window.location.origin).replace(/\/$/, "");
+
+      document.getElementById("adminForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        metrics.innerHTML = "";
+        logs.innerHTML = "";
+
+        const response = await fetch(`${apiBase.value.replace(/\/$/, "")}/api/admin/metrics`, {
+          headers: { Authorization: `Bearer ${token.value}` },
+        });
+        const payload = await response.json();
+
+        if (!response.ok) {
+          logs.innerHTML = `<div class="empty-state">${escapeHtml(payload.error || "Falha ao carregar métricas.")}</div>`;
+          return;
+        }
+
+        metrics.innerHTML = [
+          ["Usuários", payload.users],
+          ["Uso da IA", payload.aiRequests],
+          ["Erros API", payload.apiErrors],
+          ["Consumo estimado", payload.estimatedCost],
+          ["Assinaturas", payload.subscriptions],
+          ["Pagamentos", payload.payments],
+        ]
+          .map(
+            ([label, value]) =>
+              `<article class="metric-card"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><p>YARA</p></article>`
+          )
+          .join("");
+
+        logs.innerHTML = (payload.logs || [])
+          .map(
+            (item) =>
+              `<div class="stack-row"><div><strong>${escapeHtml(item.type)}</strong><p>${escapeHtml(item.message)}</p></div><span>${escapeHtml(item.created_at)}</span></div>`
+          )
+          .join("");
+      });
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+    </script>
+  </body>
+</html>

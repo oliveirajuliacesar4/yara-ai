@@ -1,14 +1,14 @@
-# Atlas One
+# YARA AI
 
-Atlas One é uma aplicação SaaS de assistente inteligente de vida pessoal.
+YARA AI é uma aplicação SaaS de assistente inteligente de vida pessoal.
 
 Slogan: **Uma vida organizada começa aqui.**
 
 ## Produção
 
-O Atlas One foi ajustado para não depender de execução manual pelo usuário final.
+A YARA AI foi ajustada para não depender de execução manual pelo usuário final.
 
-Em produção, o usuário apenas acessa o link público, cria conta e usa o Atlas AI. A chave da OpenAI fica somente no backend.
+Em produção, o usuário apenas acessa o link público, cria conta e usa a YARA AI. A chave da OpenAI fica somente no backend.
 
 Arquitetura:
 
@@ -16,31 +16,32 @@ Arquitetura:
 - Backend Node em Render, Railway, Fly.io, AWS, Google Cloud, Azure ou similar.
 - Banco PostgreSQL em Supabase, Neon, Railway Postgres, Render Postgres ou RDS.
 - `OPENAI_API_KEY` somente no servidor.
-- Frontend usa apenas `ATLAS_API_BASE_URL`, `VITE_API_BASE_URL` ou `NEXT_PUBLIC_API_BASE_URL`.
+- Frontend usa apenas `YARA_API_BASE_URL`, `VITE_API_BASE_URL` ou `NEXT_PUBLIC_API_BASE_URL`.
 
 Leia [DEPLOY.md](DEPLOY.md) para publicar.
 
 ## Login demo
 
-- Email: `isis@atlas.one`
-- Senha: `atlas123`
+- Email: `isis@yara.ai`
+- Senha: `yara123`
 
 ## Recursos
 
 - Dashboard inteligente.
-- Atlas AI integrado via backend seguro.
-- Meu Atlas com memória inteligente.
+- YARA AI integrada via backend seguro.
+- Memória inteligente da YARA.
 - Saúde, hábitos, metas, produtividade, agenda e finanças.
-- Planos Atlas One com Free, Plus, Pro e Elite.
+- Planos YARA AI com Free, Plus, Pro e Elite.
 - Checkout com arquitetura para Stripe, Mercado Pago e Asaas.
 - Relatórios PDF com bloqueio premium.
-- Painel admin separado em `admin.html`.
+- Frontend oficial servido somente a partir de `public/`.
+- Painel admin separado em `public/admin.html`.
 - Schema PostgreSQL em `database/schema.sql`.
 
 ## APIs do backend
 
 - `GET /api/health`
-- `POST /api/atlas-ai`
+- `POST /api/yara-ai`
 - `POST /api/payments/checkout`
 - `POST /api/open-finance/connect`
 - `GET /api/admin/metrics`
@@ -67,12 +68,12 @@ pnpm start
 Depois acesse:
 
 ```text
-http://localhost:5500
+http://localhost:3000
 ```
 
 Para simular frontend separado:
 
 ```powershell
-$env:ATLAS_API_BASE_URL="https://api.seudominio.com"
+$env:YARA_API_BASE_URL="https://api.seudominio.com"
 node scripts/build-frontend.js
 ```

@@ -1,14 +1,14 @@
 {
-  "name": "atlas-one",
+  "name": "yara-ai",
   "version": "1.0.0",
   "private": true,
-  "description": "Atlas One personal operating system SaaS prototype with OpenAI backend proxy.",
+  "description": "YARA AI web interface and Express backend for Render.",
   "packageManager": "pnpm@9.15.4",
   "scripts": {
-    "build": "pnpm install --shamefully-hoist",
+    "build": "node scripts/build-frontend.js",
     "start": "node server.js",
     "dev": "node server.js",
-    "check": "node --check app.js && node --check server.js && node --check scripts/write-config.js && node --check scripts/build-frontend.js && node --check scripts/verify-render-entrypoint.js"
+    "check": "node --check public/app.js && node --check server.js && node --check scripts/write-config.js && node --check scripts/build-frontend.js && node --check scripts/verify-render-entrypoint.js"
   },
   "dependencies": {
     "express": "^4.19.2",
